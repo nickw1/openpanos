@@ -1,6 +1,9 @@
 # openpanos
 A platform for creating linked, navigable networks of 360 panoramas.
 
+## PLEASE NOTE
+This documentation is not yet complete.
+
 ## Introduction
 OpenPanos is a platform for creating linked networks of 360 panoramas. It is based on the core engine of [OpenTrailView](https://opentrailview.org), a project to
 create 360 tours of paths and trails. It uses various other libraries:
