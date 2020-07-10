@@ -1,0 +1,19 @@
+{
+    "name": "openpanos-client",
+    "version": "0.0.200710",
+    "description": "OpenPanos Client",
+    "dependencies": {
+        "jsfreemaplib": "^0.2.2",
+        "@turf/distance": "^6.0.1",
+        "@turf/bearing": "^6.0.1",
+        "turf-point": "^2.0.1",
+        "@turf/explode": "^5.1.0",
+        "tinyqueue": "^2.0.0",
+        "pannellum": "^2.5.6"
+    },
+    "scripts": {
+        "install": "browserify index.js > bundle.js"
+    },
+    "author": "nickw",
+    "license": "GPL-3.0-or-later"
+}
