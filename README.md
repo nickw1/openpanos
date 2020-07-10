@@ -36,7 +36,7 @@ In addition to populating your database with OSM date, you should also:
 ~~~~
 cd app
 npm install
-cd public/js
+cd client/js
 npm install
 ~~~~
 

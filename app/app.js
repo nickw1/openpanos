@@ -9,7 +9,7 @@ app.enable('trust proxy');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(express.static('public'));
+app.use(express.static('client/public'));
 
 
 app.use('/op', opRouter);
