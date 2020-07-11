@@ -135,7 +135,7 @@ class PanoModel {
     async deletePano(id) {
         if(await this.authorisedToChange(id)) {
             const dbres = await this.db.query("DELETE FROM panoramas WHERE id=$1", [id]);
-            fs.unlink(`/var/www/html/panos/${id}.jpg`);
+            fs.unlink(`${process.env.PANOS_DIR}/${id}.jpg`);
             return true;
         } else {    
             return Promise.reject({"status": 401, "error" : "No permission to delete"});
@@ -154,7 +154,7 @@ class PanoModel {
     async getImage(id) {
         const dbres = await this.db.query(`SELECT * FROM panoramas WHERE id=$1 AND authorised=1`, [id]);
         if(dbres.rows && dbres.rows.length == 1) {
-            return fs.readFile(`/var/www/html/panos/${id}.jpg`);
+            return fs.readFile(`${process.env.PANOS_DIR}/${id}.jpg`);
         } else {
             return Promise.reject({"status": 404, "error": `Cannot access panorama with ID ${id}`});
         }

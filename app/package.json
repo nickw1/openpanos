@@ -5,6 +5,7 @@
   "main": "app.js",
   "dependencies": {
     "connect-pg-simple": "^6.0.1",
+    "dotenv": "^8.2.0",
     "exifr": "^2.1.3",
     "express": "^4.17.1",
     "express-fileupload": "^1.1.6",

@@ -1,6 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
+require('dotenv').config();
 const db = require('./db');
 const opRouter = require('./routes/op');
 
@@ -9,7 +10,7 @@ app.enable('trust proxy');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(express.static('client/public'));
+app.use(express.static('public'));
 
 
 app.use('/op', opRouter);

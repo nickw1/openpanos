@@ -2,11 +2,6 @@ const Router = require('express-promise-router');
 const router = new Router();
 const panorama = require('../controllers/panorama');
 
-
-router.get('/', (req,res)=> {
-	res.send('hello world panoarams');
-});
-
 router.get('/:id(\\d+)', panorama.findById);
 router.get('/:id/nearby', panorama.findNearby);
 router.get('/nearest/:lon/:lat', panorama.findNearest);

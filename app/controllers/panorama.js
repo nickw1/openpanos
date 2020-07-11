@@ -172,7 +172,7 @@ const panorama = {
                         id = dbres.rows[0].id;
                     }
                     if(id > 0) {
-                        req.files.file.mv(`/var/www/html/panos/${id}.jpg`, async(err)=> {    
+                        req.files.file.mv(`${process.env.PANOS_DIR}/${id}.jpg`, async(err)=> {    
                             if(err) {
                                 res.status(500).send({ error: err });
                             }  else {
