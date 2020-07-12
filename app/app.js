@@ -2,8 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
 require('dotenv').config();
-const db = require('./db');
-const opRouter = require('./routes/op');
+const opRouter = require('./op');
 
 
 app.enable('trust proxy');

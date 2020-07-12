@@ -4,116 +4,99 @@ const PanoModel = require('../models/panomodel');
 const Photosphere = require('../models/photosphere');
 
 
-const panorama = { 
-    findById: async (req, res) => {    
-        const model = new PanoModel(db);
+class PanoController { 
+    async findById (req, res) {    
+        const model = this.createModel();
         const dbres = await model.findById(req.params.id);    
         res.json(dbres.rows.length===1 ? dbres.rows[0]: []); 
-    },
+    }
 
-
-    getPanoImg: async(req, res)=> {
+    async getPanoImg(req, res) {
         try {
-            const model = new PanoModel(db);
-            const bytes = await model.getImage(req.params.id);
+            const bytes = await fs.promises.readFile(`${process.env.PANOS_DIR}/${req.params.id}.jpg`);
             res.set('content-type', 'image/jpeg').send(bytes);
+            
         } catch(e) {
-            if(e.status && e.error) {
-                res.status(e.status).json({error: e.error});
-            } else {
-                console.error(e);
-                res.status(404).json({error:"Unable to open panorama"});
-            }
+            return Promise.reject(e);
         }
-    },
+    }
 
 
-    findNearby:  async (req,res)=> {
-        const model = new PanoModel(db);
+    async findNearby (req,res) {
+        const model = this.createModel();
         const results = await model.findNearby(req.params.id);
         res.json(results);
-    },
+    }
 
-    findNearest: async (req,res)=> {
+    async findNearest (req,res) {
         if (/^-?[\d\.]+$/.test(req.params.lon) && /^-?[\d\.]+$/.test(req.params.lat)) {
-            const model = new PanoModel(db);
+            const model = this.createModel();
             const results = await model.findNearest(req.params.lon, req.params.lat);
             res.json(results);
         } else {
             res.status(400).json([]);    
         }
-    },
+    }
    
-    getByBbox: async (req,res)=> {
+    async getByBbox(req,res) {
         if(req.query.bbox !== undefined) {
             const bb = req.query.bbox.split(",").filter( value => /^-?[\d\.]+$/.test(value));
             if(bb.length == 4) {
-                const model = new PanoModel(db);
+                const model = this.createModel();
                 const results = await model.getByBbox(bb);
                 res.json(results);
             }
         } else {
             res.status(400).json({"error": "Please supply a bbox."});
         }
-    }, 
+    } 
 
-    getAllByUser: async (req, res)=> {
-        let userid = 1;
-        if(userid === undefined) {
-            res.status(401);
-        } else {
-            const model = new PanoModel(db);
-            const result = await model.getPanosByUser(userid);
-            res.json(result);
-        }
-    },
-
-    getUnpositioned: async (req, res)=> {
-        const model = new PanoModel(db);
+    async getUnpositioned(req, res) {
+        const model = this.createModel();
         const result = await model.getUnpositioned(1);
         res.json(result);
-    },
+    }
 
-    getUnauthorised: async (req, res)=> {
+    async getUnauthorised (req, res) {
         if(false) {
             res.status(401).json({"obj": JSON.stringify(this)});
         } else {
-            const model = new PanoModel(db);
+            const model = this.createModel();
             const result = await model.getUnauthorised();
             res.json(result);
         }
-    },
+    }
     
-    rotate: async(req,res)=> {
+    async rotate(req,res) {
         try {
-            const model = new PanoModel(db);
+            const model = this.createModel();
             const data = await model.rotate(req.params.id, req.body.poseheadingdegrees);
             res.json(data);
         } catch(e) {
             res.status(e.status).json({error: e.error});
         }
-    },
+    }
 
-    move: async(req,res)=> {
+   async move(req,res) {
         try {
-            const model = new PanoModel(db);
+            const model = this.createModel();
             const data = await model.move(req.params.id, req.body.lon, req.body.lat);
             res.json(data);
         } catch(e) {
             res.status(e.status).json({error: e.error});
         }
-    },
+    }
 
-    moveMulti: async(req,res)=> {
-        const model = new PanoModel(db);
+    async moveMulti(req,res) {
+        const model = this.createModel();
         await res.json(model.moveMulti(req.body));
         res.send();
-    },
+    }
 
-    deletePano: async(req, res)=> {
+    async deletePano(req, res) {
         if(/^\d+$/.test(req.params.id)) {
             try {
-                const model = new PanoModel(db);
+                const model = this.createModel();
                 await model.deletePano(req.params.id);
                 res.send();
             } catch(e) {
@@ -122,12 +105,12 @@ const panorama = {
         } else {
             res.status(400);
         }
-    },
+    }
 
-    authorisePano: async(req, res)=> {
+    async authorisePano(req, res) {
         if(/^\d+$/.test(req.params.id)) {
             try {
-                const model = new PanoModel(db);
+                const model = this.createModel();
                 await model.authorisePano(req.params.id);
                 res.send();
             } catch(e) {
@@ -136,15 +119,13 @@ const panorama = {
         } else {
             res.status(400);
         }
-    },
+    }
 
-    uploadPano: async(req,res)=> {
+    async uploadPano(req,res) {
         let warnings = []; 
         const maxFileSize = 15;
-        const model = new PanoModel(db);
-        if(!model.authorisedToUpload()) {
-            res.status(401).json({"error": "You must be authenticated to upload panos."});
-        } else if (!req.files.file) {
+        const model = this.createModel(); 
+        if (!req.files.file) {
             res.status(400).json({"error": "No panorama provided."});
         } else {
             if(req.files.file.size > 1048576 * maxFileSize) {
@@ -188,7 +169,11 @@ const panorama = {
             }
         }    
     }
-};
+
+    createModel() {
+        return new PanoModel(db);
+    }
+}
     
 
-module.exports = panorama;
+module.exports = PanoController;

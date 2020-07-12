@@ -1,4 +1,3 @@
-const fs = require('fs').promises;
 
 class PanoModel {
     constructor(db) {
@@ -9,21 +8,15 @@ class PanoModel {
         this.db = db;
     }
 
-    toString() {
-        return "PanoModel instance";
-    }
-
     async findById(id)  {    
         console.log(`model: findById(): ${id}`);
-        const dbres =  await this.db.query("SELECT id, ST_X(the_geom) AS lon, ST_Y(the_geom) AS lat, poseheadingdegrees FROM panoramas WHERE id=$1 AND authorised=1",[id]);
+        const dbres =  await this.db.query(`SELECT id, ST_X(the_geom) AS lon, ST_Y(the_geom) AS lat, poseheadingdegrees FROM panoramas WHERE id=$1 AND ${this.isViewable()}`,[id]);
         console.log(`dbres: ${JSON.stringify(dbres.rows)}`);
         return dbres;
     }
 
-
-
     async findNearby(id) {
-        const dbres = await this.db.query('SELECT id, ST_X(the_geom) AS lon, ST_Y(the_geom) AS lat, poseheadingdegrees FROM panoramas WHERE ST_Distance((SELECT ST_Transform(the_geom, 3857) FROM panoramas WHERE id=$1), ST_Transform(the_geom,3857)) < 500 AND authorised=1', [id]);
+        const dbres = await this.db.query(`SELECT id, ST_X(the_geom) AS lon, ST_Y(the_geom) AS lat, poseheadingdegrees FROM panoramas WHERE ST_Distance((SELECT ST_Transform(the_geom, 3857) FROM panoramas WHERE id=$1), ST_Transform(the_geom,3857)) < 500 AND ${this.isViewable()}`, [id]);
         const lats = dbres.rows.map ( row => row.lat ),
               lons = dbres.rows.map ( row => row.lon );
         return {'panos': dbres.rows.filter( row => row.id != id ),
@@ -42,7 +35,7 @@ class PanoModel {
     }
    
     async getByBbox(bb) {
-        const dbres = await this.db.query("SELECT id, ST_X(the_geom) AS lon, ST_Y(the_geom) AS lat, poseheadingdegrees, userid FROM panoramas WHERE ST_X(the_geom) BETWEEN $1 AND $3 AND ST_Y(the_geom) BETWEEN $2 and $4 AND authorised=1", bb);
+        const dbres = await this.db.query(`SELECT id, ST_X(the_geom) AS lon, ST_Y(the_geom) AS lat, poseheadingdegrees, userid FROM panoramas WHERE ST_X(the_geom) BETWEEN $1 AND $3 AND ST_Y(the_geom) BETWEEN $2 and $4 AND ${this.isViewable()}`, bb);
         
         const geojson = { 'type' : 'FeatureCollection', 'features:' : [] };
         geojson.features = dbres.rows.map( row =>  {
@@ -81,31 +74,21 @@ class PanoModel {
     }
 
     async rotate(id, poseheadingdegrees) {
-        if(await this.authorisedToChange(id)) {
-            const dbres = await this.db.query(`UPDATE panoramas SET poseheadingdegrees=$1 WHERE id=$2`, [poseheadingdegrees, id] );
-            return dbres.rows;
-        } else { 
-            return Promise.reject({"status": 401, "error" : "No permission to rotate"});
-        }
+        const dbres = await this.db.query(`UPDATE panoramas SET poseheadingdegrees=$1 WHERE id=$2`, [poseheadingdegrees, id] );
+        return dbres.rows;
     }
 
     async move(id, lon, lat) {
         let code = 200;
         let msg = "";
-        if(await this.authorisedToChange(id)) {
-            if(/^\d+$/.test(id) && /^-?[\d\.]+$/.test(lon) &&
-                /^-?[\d\.]+$/.test(lat)) {
-                const geom = `ST_GeomFromText('POINT(${lon} ${lat})', 4326)`;
-                const dbres = await this.db.query(`UPDATE panoramas SET the_geom=${geom} WHERE id=$1`, [id]);
-                return dbres.rows;
-            } else {
-                code = 400;
-                msg = "Invalid pano ID, latitude and/or longitude.";
-            } 
-        }  else {
-            code = 401;
-            msg = "No permission to move panorama";
-        }
+        if(/^\d+$/.test(id) && /^-?[\d\.]+$/.test(lon) && /^-?[\d\.]+$/.test(lat)) {
+            const geom = `ST_GeomFromText('POINT(${lon} ${lat})', 4326)`;
+            const dbres = await this.db.query(`UPDATE panoramas SET the_geom=${geom} WHERE id=$1`, [id]);
+            return dbres.rows;
+        } else {
+            code = 400;
+            msg = "Invalid pano ID, latitude and/or longitude.";
+        } 
         return Promise.reject({status: code, error: msg});
     }
 
@@ -120,44 +103,28 @@ class PanoModel {
         return successful;
     }
 
-    // Override to test such things as whether a user owns the panorama,
-    // whether the user is an admin, etc...
-    // (user management is not part of the basic openpanos platform)
-    async authorisedToChange(panoid)  {
-        return true;
-    }
-
-    // Likewise
-    authorisedToUpload () {
-        return true;
-    }
-
     async deletePano(id) {
-        if(await this.authorisedToChange(id)) {
-            const dbres = await this.db.query("DELETE FROM panoramas WHERE id=$1", [id]);
-            fs.unlink(`${process.env.PANOS_DIR}/${id}.jpg`);
-            return true;
-        } else {    
-            return Promise.reject({"status": 401, "error" : "No permission to delete"});
-        }
+        const dbres = await this.db.query("DELETE FROM panoramas WHERE id=$1", [id]);
+        fs.unlink(`${process.env.PANOS_DIR}/${id}.jpg`);
+        return true;
     }
 
     async authorisePano(id) {
-        if(await this.authorisedToChange(id)) {
-            const dbres = await this.db.query("UPDATE  panoramas SET authorised=1 WHERE id=$1", [id]);
-            return true; 
-        } else {
-            return Promise.reject({"status": 401, "error" : "No permission to authorise"});
-        }
+        const dbres = await this.db.query("UPDATE panoramas SET authorised=1 WHERE id=$1", [id]);
+        return true; 
     }
 
     async getImage(id) {
-        const dbres = await this.db.query(`SELECT * FROM panoramas WHERE id=$1 AND authorised=1`, [id]);
+        const dbres = await this.db.query(`SELECT * FROM panoramas WHERE id=$1 AND ${this.isViewable()}`, [id]);
         if(dbres.rows && dbres.rows.length == 1) {
             return fs.readFile(`${process.env.PANOS_DIR}/${id}.jpg`);
         } else {
             return Promise.reject({"status": 404, "error": `Cannot access panorama with ID ${id}`});
         }
+    }
+
+    isViewable() {
+        return "authorised=1";
     }
 }
     

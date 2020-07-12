@@ -25,7 +25,7 @@ class Client {
 
 
     findPanoramaByLonLat(lon,lat) {
-        var resp = fetch(this.apiNearest
+        var resp = fetch(this.api.nearest
                 .replace('{lon}', lon)
                 .replace('{lat}', lat))
                 .then(resp=>resp.json())

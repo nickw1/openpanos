@@ -1,5 +1,5 @@
-const panoRouter = require('./panorama');
-const mapRouter = require('./map');
+const panoRouter = require('./routes/panorama');
+const mapRouter = require('./routes/map');
 
 const fileUpload = require('express-fileupload');
 const Router = require('express-promise-router');
@@ -11,7 +11,7 @@ router.use('/map', mapRouter);
 router.use('/panorama/upload', fileUpload( { limits: 
             { fileSize: 8 * 1024 * 1024},
                     useTempFiles: true,
-                    tempFileDir: '/var/www/tmp'} ));
+                    tempFileDir: process.env.TMPDIR} ));
 router.get('/', (req,res)=> {
     res.send('Welcome to OpenPanos!');
 });
