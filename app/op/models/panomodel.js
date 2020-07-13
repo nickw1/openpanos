@@ -11,16 +11,19 @@ class PanoModel {
 
     async findById(id)  {    
         console.log(`model: findById(): ${id}`);
-        const dbres =  await this.db.query(`SELECT id, userid, ST_X(the_geom) AS lon, ST_Y(the_geom) AS lat, poseheadingdegrees FROM panoramas WHERE id=$1 ${this.isViewable(id)}`,[id]);
-        console.log(`dbres: ${JSON.stringify(dbres.rows)}`);
-        return dbres;
+        const dbres =  await this.db.query(`SELECT id, userid, authorised, ST_X(the_geom) AS lon, ST_Y(the_geom) AS lat, poseheadingdegrees FROM panoramas WHERE id=$1`,[id]);
+        if(dbres.rows && dbres.rows.length == 1 && this.isViewable(dbres.rows[0])) {
+            console.log(`dbres: ${JSON.stringify(dbres.rows)}`);
+            return dbres;
+        }
+        return Promise.reject({"status": 404, "error": `Cannot access panorama with ID ${id}`});
     }
 
     async findNearby(id) {
-        const dbres = await this.db.query(`SELECT id, ST_X(the_geom) AS lon, ST_Y(the_geom) AS lat, poseheadingdegrees FROM panoramas WHERE ST_Distance((SELECT ST_Transform(the_geom, 3857) FROM panoramas WHERE id=$1), ST_Transform(the_geom,3857)) < 500 ${this.isViewable(id)}`, [id]);
+        const dbres = await this.db.query(`SELECT id, ST_X(the_geom) AS lon, ST_Y(the_geom) AS lat, poseheadingdegrees, userid, authorised FROM panoramas WHERE ST_Distance((SELECT ST_Transform(the_geom, 3857) FROM panoramas WHERE id=$1), ST_Transform(the_geom,3857)) < 500`, [id]);
         const lats = dbres.rows.map ( row => row.lat ),
               lons = dbres.rows.map ( row => row.lon );
-        return {'panos': dbres.rows.filter( row => row.id != id ),
+        return {'panos': dbres.rows.filter( row => row.id != id && this.isViewable(row)),
                  'bbox':     
                     [ Math.min(...lons)-0.0001, 
                         Math.min(...lats)-0.0001, 
@@ -31,15 +34,17 @@ class PanoModel {
 
     async findNearest(lon,lat) {
         const geom = `ST_Distance(ST_GeomFromText('POINT(${lon} ${lat})', 4326), the_geom)`;
-        const dbres = await this.db.query(`SELECT id, ST_X(the_geom) AS lon, ST_Y(the_geom) AS lat, poseheadingdegrees FROM panoramas ORDER by ${geom} LIMIT 1`);
+        const dbres = await this.db.query(`SELECT id, ST_X(the_geom) AS lon, ST_Y(the_geom) AS lat, poseheadingdegrees, userid, authorised FROM panoramas ORDER by ${geom} LIMIT 1`);
         return dbres.rows.length == 1 ? dbres.rows[0] : [];
     }
    
     async getByBbox(bb) {
-        const dbres = await this.db.query(`SELECT id, ST_X(the_geom) AS lon, ST_Y(the_geom) AS lat, poseheadingdegrees, userid FROM panoramas WHERE ST_X(the_geom) BETWEEN $1 AND $3 AND ST_Y(the_geom) BETWEEN $2 and $4 ${this.isViewable(id)}`, bb);
+        const dbres = await this.db.query(`SELECT id, ST_X(the_geom) AS lon, ST_Y(the_geom) AS lat, poseheadingdegrees, userid, authorised FROM panoramas WHERE ST_X(the_geom) BETWEEN $1 AND $3 AND ST_Y(the_geom) BETWEEN $2 and $4`, bb);
         
         const geojson = { 'type' : 'FeatureCollection', 'features:' : [] };
-        geojson.features = dbres.rows.map( row =>  {
+        geojson.features = dbres.rows
+                .filter(row => this.isViewable(row))
+                .map( row =>  {
                     return {   type: 'Feature',
                                 geometry: {
                                     type: 'Point',
@@ -70,7 +75,7 @@ class PanoModel {
     }
     
     async getPanosByCriterion(sql,boundData){    
-        const dbres = await this.db.query(`SELECT id, poseheadingdegrees, timestamp, authorised, ST_X(the_geom) AS lon, ST_Y(the_geom) AS lat FROM panoramas WHERE ${sql} ORDER BY id`, boundData || []);
+        const dbres = await this.db.query(`SELECT id, poseheadingdegrees, timestamp, authorised, ST_X(the_geom) AS lon, ST_Y(the_geom) AS lat, userid, authorised FROM panoramas WHERE ${sql} ORDER BY id`, boundData || []);
         return dbres.rows; 
     }
 
@@ -116,16 +121,16 @@ class PanoModel {
     }
 
     async getImage(id) {
-        const dbres = await this.db.query(`SELECT * FROM panoramas WHERE id=$1 ${this.isViewable(id)}`, [id]);
-        if(dbres.rows && dbres.rows.length == 1) {
+        const dbres = await this.db.query(`SELECT * FROM panoramas WHERE id=$1`, [id]);
+        if(dbres.rows && dbres.rows.length == 1 && this.isViewable(dbres.rows[0])) {
             return fs.readFile(`${process.env.PANOS_DIR}/${id}.jpg`);
         } else {
             return Promise.reject({"status": 404, "error": `Cannot access panorama with ID ${id}`});
         }
     }
 
-    isViewable(id) {
-        return this.canViewUnauthorised(id) ? "" : " AND authorised=1";
+    isViewable(panodetails) {
+        return panodetails.authorised == 1 || this.canViewUnauthorised(panodetails);
     }
 }
     
