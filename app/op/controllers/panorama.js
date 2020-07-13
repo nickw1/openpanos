@@ -10,7 +10,7 @@ class PanoController {
     }
 
     async findById (req, res) {    
-        const model = this.createModel();
+        const model = this.createModel(req);
         const dbres = await model.findById(req.params.id);    
         res.json(dbres.rows.length===1 ? dbres.rows[0]: []); 
     }
@@ -27,14 +27,14 @@ class PanoController {
 
 
     async findNearby (req,res) {
-        const model = this.createModel();
+        const model = this.createModel(req);
         const results = await model.findNearby(req.params.id);
         res.json(results);
     }
 
     async findNearest (req,res) {
         if (/^-?[\d\.]+$/.test(req.params.lon) && /^-?[\d\.]+$/.test(req.params.lat)) {
-            const model = this.createModel();
+            const model = this.createModel(req);
             const results = await model.findNearest(req.params.lon, req.params.lat);
             res.json(results);
         } else {
@@ -46,7 +46,7 @@ class PanoController {
         if(req.query.bbox !== undefined) {
             const bb = req.query.bbox.split(",").filter( value => /^-?[\d\.]+$/.test(value));
             if(bb.length == 4) {
-                const model = this.createModel();
+                const model = this.createModel(req);
                 const results = await model.getByBbox(bb);
                 res.json(results);
             }
@@ -56,7 +56,7 @@ class PanoController {
     } 
 
     async getUnpositioned(req, res) {
-        const model = this.createModel();
+        const model = this.createModel(req);
         const result = await model.getUnpositioned(1);
         res.json(result);
     }
@@ -65,7 +65,7 @@ class PanoController {
         if(false) {
             res.status(401).json({"obj": JSON.stringify(this)});
         } else {
-            const model = this.createModel();
+            const model = this.createModel(req);
             const result = await model.getUnauthorised();
             res.json(result);
         }
@@ -73,7 +73,7 @@ class PanoController {
     
     async rotate(req,res) {
         try {
-            const model = this.createModel();
+            const model = this.createModel(req);
             const data = await model.rotate(req.params.id, req.body.poseheadingdegrees);
             res.json(data);
         } catch(e) {
@@ -83,7 +83,7 @@ class PanoController {
 
    async move(req,res) {
         try {
-            const model = this.createModel();
+            const model = this.createModel(req);
             const data = await model.move(req.params.id, req.body.lon, req.body.lat);
             res.json(data);
         } catch(e) {
@@ -92,7 +92,7 @@ class PanoController {
     }
 
     async moveMulti(req,res) {
-        const model = this.createModel();
+        const model = this.createModel(req);
         await res.json(model.moveMulti(req.body));
         res.send();
     }
@@ -100,7 +100,7 @@ class PanoController {
     async deletePano(req, res) {
         if(/^\d+$/.test(req.params.id)) {
             try {
-                const model = this.createModel();
+                const model = this.createModel(req);
                 await model.deletePano(req.params.id);
                 res.send();
             } catch(e) {
@@ -114,7 +114,7 @@ class PanoController {
     async authorisePano(req, res) {
         if(/^\d+$/.test(req.params.id)) {
             try {
-                const model = this.createModel();
+                const model = this.createModel(req);
                 await model.authorisePano(req.params.id);
                 res.send();
             } catch(e) {
@@ -128,7 +128,7 @@ class PanoController {
     async uploadPano(req,res) {
         let warnings = []; 
         const maxFileSize = 15;
-        const model = this.createModel(); 
+        const model = this.createModel(req); 
         if (!req.files.file) {
             res.status(400).json({"error": "No panorama provided."});
         } else {
@@ -174,10 +174,10 @@ class PanoController {
         }    
     }
 
-    createModel() {
+    createModel(req) {
         return new PanoModel({ 
             db: db,
-            canViewUnauthorised: this.canViewUnauthorised
+            canViewUnauthorised: this.canViewUnauthorised.bind(this, req)
         });
     }
 }
