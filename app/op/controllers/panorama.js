@@ -5,6 +5,10 @@ const Photosphere = require('../models/photosphere');
 
 
 class PanoController { 
+    constructor() {
+        this.canViewUnauthorised = (id) => 0;
+    }
+
     async findById (req, res) {    
         const model = this.createModel();
         const dbres = await model.findById(req.params.id);    
@@ -171,7 +175,10 @@ class PanoController {
     }
 
     createModel() {
-        return new PanoModel(db);
+        return new PanoModel({ 
+            db: db,
+            canViewUnauthorised: this.canViewUnauthorised
+        });
     }
 }
     

@@ -1,7 +1,8 @@
 
 class PanoModel {
-    constructor(db) {
-        this.db = db;
+    constructor(options) {
+        this.db = options.db;
+        this.canViewUnauthorised = options.canViewUnauthorised || ( () =>  0 );
     }
 
     setDb(db) {
@@ -10,13 +11,13 @@ class PanoModel {
 
     async findById(id)  {    
         console.log(`model: findById(): ${id}`);
-        const dbres =  await this.db.query(`SELECT id, ST_X(the_geom) AS lon, ST_Y(the_geom) AS lat, poseheadingdegrees FROM panoramas WHERE id=$1 AND ${this.isViewable()}`,[id]);
+        const dbres =  await this.db.query(`SELECT id, userid, ST_X(the_geom) AS lon, ST_Y(the_geom) AS lat, poseheadingdegrees FROM panoramas WHERE id=$1 ${this.isViewable(id)}`,[id]);
         console.log(`dbres: ${JSON.stringify(dbres.rows)}`);
         return dbres;
     }
 
     async findNearby(id) {
-        const dbres = await this.db.query(`SELECT id, ST_X(the_geom) AS lon, ST_Y(the_geom) AS lat, poseheadingdegrees FROM panoramas WHERE ST_Distance((SELECT ST_Transform(the_geom, 3857) FROM panoramas WHERE id=$1), ST_Transform(the_geom,3857)) < 500 AND ${this.isViewable()}`, [id]);
+        const dbres = await this.db.query(`SELECT id, ST_X(the_geom) AS lon, ST_Y(the_geom) AS lat, poseheadingdegrees FROM panoramas WHERE ST_Distance((SELECT ST_Transform(the_geom, 3857) FROM panoramas WHERE id=$1), ST_Transform(the_geom,3857)) < 500 ${this.isViewable(id)}`, [id]);
         const lats = dbres.rows.map ( row => row.lat ),
               lons = dbres.rows.map ( row => row.lon );
         return {'panos': dbres.rows.filter( row => row.id != id ),
@@ -35,7 +36,7 @@ class PanoModel {
     }
    
     async getByBbox(bb) {
-        const dbres = await this.db.query(`SELECT id, ST_X(the_geom) AS lon, ST_Y(the_geom) AS lat, poseheadingdegrees, userid FROM panoramas WHERE ST_X(the_geom) BETWEEN $1 AND $3 AND ST_Y(the_geom) BETWEEN $2 and $4 AND ${this.isViewable()}`, bb);
+        const dbres = await this.db.query(`SELECT id, ST_X(the_geom) AS lon, ST_Y(the_geom) AS lat, poseheadingdegrees, userid FROM panoramas WHERE ST_X(the_geom) BETWEEN $1 AND $3 AND ST_Y(the_geom) BETWEEN $2 and $4 ${this.isViewable(id)}`, bb);
         
         const geojson = { 'type' : 'FeatureCollection', 'features:' : [] };
         geojson.features = dbres.rows.map( row =>  {
@@ -115,7 +116,7 @@ class PanoModel {
     }
 
     async getImage(id) {
-        const dbres = await this.db.query(`SELECT * FROM panoramas WHERE id=$1 AND ${this.isViewable()}`, [id]);
+        const dbres = await this.db.query(`SELECT * FROM panoramas WHERE id=$1 ${this.isViewable(id)}`, [id]);
         if(dbres.rows && dbres.rows.length == 1) {
             return fs.readFile(`${process.env.PANOS_DIR}/${id}.jpg`);
         } else {
@@ -123,8 +124,8 @@ class PanoModel {
         }
     }
 
-    isViewable() {
-        return "authorised=1";
+    isViewable(id) {
+        return this.canViewUnauthorised(id) ? "" : " AND authorised=1";
     }
 }
     

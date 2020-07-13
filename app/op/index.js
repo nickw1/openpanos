@@ -16,4 +16,7 @@ router.get('/', (req,res)=> {
     res.send('Welcome to OpenPanos!');
 });
 
-module.exports = router;
+module.exports = {
+    router: router,
+    panoController: panoRouter.controller
+};

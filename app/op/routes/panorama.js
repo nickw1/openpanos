@@ -17,4 +17,5 @@ router.get('/:id(\\d+).jpg', panorama.getPanoImg.bind(panorama));
 router.delete('/:id(\d+)', panorama.deletePano.bind(panorama));
 	
 
+router.controller = panorama;
 module.exports = router;

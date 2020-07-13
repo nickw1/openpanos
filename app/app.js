@@ -2,7 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
 require('dotenv').config();
-const opRouter = require('./op');
+const op = require('./op');
 
 
 app.enable('trust proxy');
@@ -12,7 +12,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static('public'));
 
 
-app.use('/op', opRouter);
+app.use('/op', op.router);
 
 app.set('view engine', 'pug');
 
