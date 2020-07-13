@@ -1,3 +1,4 @@
+const fs = require('fs');
 
 class PanoModel {
     constructor(options) {
@@ -17,6 +18,16 @@ class PanoModel {
             return dbres;
         }
         return Promise.reject({"status": 404, "error": `Cannot access panorama with ID ${id}`});
+    }
+
+    async findByUser(userid) {
+        const dbres = await this.db.query('SELECT id, userid, authorised, ST_X(the_geom) AS lon, ST_Y(the_geom) AS lat, poseheadingdegrees FROM panoramas WHERE userid=$1', [userid]);
+        return dbres.rows || [];
+    }
+
+    async findByUserUnpositioned(userid) {
+        const dbres = await this.db.query('SELECT id, userid, authorised, ST_X(the_geom) AS lon, ST_Y(the_geom) AS lat, poseheadingdegrees FROM panoramas WHERE userid=$1 AND the_geom IS NULL', [userid]);
+        return dbres.rows || [];
     }
 
     async findNearby(id) {
@@ -64,10 +75,6 @@ class PanoModel {
 
     async getPanosByUser(userid, sql='') {
         return this.getPanosByCriterion(`userid=$1 ${sql}`, [userid]);
-    }
-
-    async getUnpositioned (userid) {
-        return this.getPanosByUser(userid, 'AND the_geom IS NULL');
     }
 
     async getUnauthorised () {

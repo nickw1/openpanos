@@ -18,6 +18,12 @@ class MapModel {
             return feature;
         })};
     }
+
+    async getNearestHighway(lon, lat, distThreshold) {
+        console.log(`SELECT ST_AsText(ST_Transform(ST_ClosestPoint(way, transformed), 4326)) AS closest, highway, waydist FROM (SELECT *, ST_Distance(way, transformed) AS waydist FROM planet_osm_line, (SELECT ST_Transform(ST_GeomFromText('POINT(${lon} ${lat})', 4326), 3857) AS transformed) AS tquery WHERE way && ST_Transform(ST_SetSRID('BOX3D(${lon-0.01} ${lat-0.01},${lon+0.01} ${lat+0.01})'::box3d, 4326), 3857) ) AS dquery WHERE highway<>'' AND waydist < $1 ORDER BY waydist LIMIT 1`);
+        const dbres = await this.db.query(`SELECT ST_AsText(ST_Transform(ST_ClosestPoint(way, transformed), 4326)) AS closest, highway, waydist FROM (SELECT *, ST_Distance(way, transformed) AS waydist FROM planet_osm_line, (SELECT ST_Transform(ST_GeomFromText('POINT(${lon} ${lat})', 4326), 3857) AS transformed) AS tquery WHERE way && ST_Transform(ST_SetSRID('BOX3D(${lon-0.01} ${lat-0.01},${lon+0.01} ${lat+0.01})'::box3d, 4326), 3857) ) AS dquery WHERE highway<>'' AND waydist < $1 ORDER BY waydist LIMIT 1`, [distThreshold]);
+        return dbres.rows && dbres.rows.length == 1 ? dbres.rows[0] : {};
+    }
 }
 
 module.exports = MapModel;

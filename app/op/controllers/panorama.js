@@ -55,12 +55,6 @@ class PanoController {
         }
     } 
 
-    async getUnpositioned(req, res) {
-        const model = this.createModel(req);
-        const result = await model.getUnpositioned(1);
-        res.json(result);
-    }
-
     async getUnauthorised (req, res) {
         if(false) {
             res.status(401).json({"obj": JSON.stringify(this)});
@@ -104,7 +98,7 @@ class PanoController {
                 await model.deletePano(req.params.id);
                 res.send();
             } catch(e) {
-                res.status(e.status).json({error: e.error});
+                res.status(500).json({error: e});
             }
         } else {
             res.status(400);
@@ -127,7 +121,7 @@ class PanoController {
 
     async uploadPano(req,res) {
         let warnings = []; 
-        const maxFileSize = 15;
+        const maxFileSize = 8;
         const model = this.createModel(req); 
         if (!req.files.file) {
             res.status(400).json({"error": "No panorama provided."});
@@ -167,7 +161,7 @@ class PanoController {
                     }
                 } catch (e) {
                     console.error(`parseFile() threw an error: ${JSON.stringify(e)}`);
-                    res.status(400).json(e);
+                    res.status(400).json({"error": e});
                     fs.unlink(tmpName, (err)=> { console.error('unlink error')});
                 }
             }
