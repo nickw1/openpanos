@@ -1,8 +1,6 @@
 # openpanos
 A platform for creating linked, navigable networks of 360 panoramas.
 
-## PLEASE NOTE
-This documentation is not yet complete.
 
 ## Introduction
 OpenPanos is a platform for creating linked networks of 360 panoramas. It is based on the core engine of [OpenTrailView](https://opentrailview.org), a project to
@@ -28,22 +26,13 @@ for more details.
 
 ## Installing ##
 
-In addition to populating your database with OSM date, you should also:
-- setup the panoramas table, using the provided `panoramas.sql`, e.g.
-`psql -U gisuser otv < panoramas.sql`
-
-- install the dependencies:
+The client and server are on npm, so it's just a case of:
 ~~~~
-cd app
-npm install
-cd client/js
-npm install
+npm install openpanos-client
+npm install openpanos-server
 ~~~~
 
-- run the server (from the root directory):
-`node app/app.js`
 
-If you have a panorama with an ID of 1, it should then be visible by
-accessing in the browser:
-`http://localhost:3000`
+## Detailed Documentation ##
 
+*TODO* !

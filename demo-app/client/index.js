@@ -1,4 +1,4 @@
-const OpenPanos = require('./openpanos');
+const openpanos = require('openpanos-client');
 
 const parts = window.location.href.split('?');
 const get = {};
@@ -23,7 +23,7 @@ params.forEach ( key => {
 });
 
 
-const client = new OpenPanos.Client();
+const client = new openpanos.Client();
 if(get.id) {
     client.loadPanorama(get.id);
 } else if (get.lat && get.lon) {

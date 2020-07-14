@@ -2,7 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
 require('dotenv').config();
-const op = require('./op');
+const op = require('openpanos-server');
 
 
 app.enable('trust proxy');
