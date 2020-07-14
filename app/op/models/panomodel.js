@@ -15,9 +15,9 @@ class PanoModel {
         const dbres =  await this.db.query(`SELECT id, userid, authorised, ST_X(the_geom) AS lon, ST_Y(the_geom) AS lat, poseheadingdegrees FROM panoramas WHERE id=$1`,[id]);
         if(dbres.rows && dbres.rows.length == 1 && this.isViewable(dbres.rows[0])) {
             console.log(`dbres: ${JSON.stringify(dbres.rows)}`);
-            return dbres;
+            return dbres.rows[0];
         }
-        return Promise.reject({"status": 404, "error": `Cannot access panorama with ID ${id}`});
+        return { }; 
     }
 
     async findByUser(userid) {
@@ -46,7 +46,7 @@ class PanoModel {
     async findNearest(lon,lat) {
         const geom = `ST_Distance(ST_GeomFromText('POINT(${lon} ${lat})', 4326), the_geom)`;
         const dbres = await this.db.query(`SELECT id, ST_X(the_geom) AS lon, ST_Y(the_geom) AS lat, poseheadingdegrees, userid, authorised FROM panoramas ORDER by ${geom} LIMIT 1`);
-        return dbres.rows.length == 1 ? dbres.rows[0] : [];
+        return dbres.rows.length == 1 ? dbres.rows[0] : {};
     }
    
     async getByBbox(bb) {
@@ -129,10 +129,14 @@ class PanoModel {
 
     async getImage(id) {
         const dbres = await this.db.query(`SELECT * FROM panoramas WHERE id=$1`, [id]);
-        if(dbres.rows && dbres.rows.length == 1 && this.isViewable(dbres.rows[0])) {
-            return fs.readFile(`${process.env.PANOS_DIR}/${id}.jpg`);
+        if(dbres.rows && dbres.rows.length == 1) { 
+            if(this.isViewable(dbres.rows[0])) {
+                return fs.promises.readFile(`${process.env.PANOS_DIR}/${id}.jpg`);
+            } else {
+                return Promise.reject({status: 401, error: 'No permission to view this panorama.'});
+            }
         } else {
-            return Promise.reject({"status": 404, "error": `Cannot access panorama with ID ${id}`});
+            return Promise.reject({status: 404, error: `Cannot access panorama with ID ${id}`});
         }
     }
 

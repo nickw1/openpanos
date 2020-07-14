@@ -19,13 +19,4 @@ router.get('/highways', async (req, res) => {
     }
 });
 
-router.get('/nearestHighway', async(req,res) => {
-    const map = new MapModel(db); 
-    if(/^-?[\d\.]+$/.test(req.query.lon) && /^-?[\d\.}+$/.test(req.query.lat) && /^[\d]+$/.test(req.query.dist)) {
-        res.json(await map.getNearestHighway(parseFloat(req.query.lon), parseFloat(req.query.lat), parseFloat(req.query.dist)));
-    } else {
-        res.status(400).json({"error": "Invalid input parameter format"});
-    }
-});
-
 module.exports = router;

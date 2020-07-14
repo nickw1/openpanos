@@ -11,17 +11,17 @@ class PanoController {
 
     async findById (req, res) {    
         const model = this.createModel(req);
-        const dbres = await model.findById(req.params.id);    
-        res.json(dbres.rows.length===1 ? dbres.rows[0]: []); 
+        const row = await model.findById(req.params.id);    
+        res.json(row); 
     }
 
     async getPanoImg(req, res) {
         try {
-            const bytes = await fs.promises.readFile(`${process.env.PANOS_DIR}/${req.params.id}.jpg`);
+            const model = this.createModel(req);
+            const bytes = await model.getImage(req.params.id);
             res.set('content-type', 'image/jpeg').send(bytes);
-            
         } catch(e) {
-            return Promise.reject(e);
+            res.status(e.status).json({error: e.error});
         }
     }
 
@@ -153,7 +153,7 @@ class PanoController {
                     if(id > 0) {
                         req.files.file.mv(`${process.env.PANOS_DIR}/${id}.jpg`, async(err)=> {    
                             if(err) {
-                                res.status(500).send({ error: err });
+                                res.status(500).json({ "error": err });
                             }  else {
                                 res.json({"success": true, "warnings": warnings});
                             }

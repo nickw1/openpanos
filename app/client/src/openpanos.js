@@ -16,11 +16,12 @@ class Client {
         this.panoMetadata = [];
         this.eventHandlers = {};
         this.curPanoId = 0;
-        this.resizePano = options.resizePano || 100;
+        this.resizePano = options.resizePano;
         this.api = { };
         this.api.nearest = options.api.nearest || 'op/panorama/nearest/{lon}/{lat}'; 
         this.api.byId = options.api.byId || 'op/panorama/{id}';
         this.api.panoImg = options.api.panoImg || 'op/panorama/{id}.jpg';
+        this.api.panoImgResized = options.api.panoImgResized || 'op/panorama/{id}.w{width}.jpg';
     }
 
 
@@ -138,7 +139,7 @@ class Client {
             var scenes = {};
             scenes[`pano${thisPano.id}`]  = {
                 'title': 'Starting Pano',
-                'panorama': this.api.panoImg.replace('{id}', thisPano.id),
+                'panorama': this.resizePano === undefined ? this.api.panoImg.replace('{id}', thisPano.id): this.api.panoImgResized.replace('{id}', thisPano.id).replace('{width}', this.resizePano),
                 'type' : 'equirectangular',
                 'hotSpots': [] };
         
@@ -179,7 +180,7 @@ class Client {
                     if(!this.viewer.getConfig().scenes[`pano${nearby.id}`]) {
                         this.viewer.addScene(`pano${nearby.id}`, {
                             title: `Pano ${nearby.id}`,
-                            'panorama':  this.api.panoImg.replace('{id}', nearby.id),
+                            'panorama':  this.resizePano === undefined ? this.api.panoImg.replace('{id}', nearby.id) : this.api.panoImgResized.replace('{id}', nearby.id).replace('{width}', this.resizePano),
                             'type': 'equirectangular'});
                     } else {
                     }
