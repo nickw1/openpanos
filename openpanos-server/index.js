@@ -5,6 +5,10 @@ const fileUpload = require('express-fileupload');
 const Router = require('express-promise-router');
 const router = new Router();
 
+const bodyParser = require('body-parser');
+router.use(bodyParser.json());
+router.use(bodyParser.urlencoded({ extended: false }));
+
 router.use('/panorama/upload', fileUpload( { limits: 
             { fileSize: 8 * 1024 * 1024},
                     useTempFiles: true,

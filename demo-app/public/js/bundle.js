@@ -15,15 +15,6 @@ if(parts.length==2) {
     }
 }
 
-
-var params = [ 'lat', 'lon' ];
-params.forEach ( key => {
-    if(get[key] === undefined && localStorage.getItem(key)!==null) {
-        get[key] = localStorage.getItem(key);
-    }
-});
-
-
 const client = new openpanos.Client();
 if(get.id) {
     client.loadPanorama(get.id);

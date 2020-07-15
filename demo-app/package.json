@@ -1,18 +1,19 @@
 {
   "name": "openpanos-demo-app",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "OpenPanos demo app",
   "main": "app.js",
   "dependencies": {
-    "openpanos-server": "^0.1.0",
+    "openpanos-server": "^0.1.1",
     "openpanos-client": "^0.1.0",
     "pug": "^2.0.4"
   },
   "devDependencies": {
-    "browserify": "^16.2.3"
+    "browserify": "^16.2.3",
+    "shx": "^0.3.2"
   },
   "scripts": {
-    "postinstall": "browserify client/index.js > public/js/bundle.js; cp node_modules/pannellum/build/pannellum.css public/css"
+    "build": "browserify client/index.js > public/js/bundle.js && shx cp node_modules/pannellum/build/pannellum.css public/css"
   },
   "author": "nickw",
   "license": "GPL-3.0-or-later"

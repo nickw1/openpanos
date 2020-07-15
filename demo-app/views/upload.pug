@@ -1,0 +1,11 @@
+doctype html
+html
+	head
+		title= title 
+	body
+		h1= title 
+		p  A very basic uploader for now. It talks to the upload API directly, so you just get JSON back telling you whether it was successful or not. Nonetheless it's enough for you to use to populate your database with panoramas for testing.
+		form(method='post' action='/op/panorama/upload' enctype='multipart/form-data')
+			input(type='file' name='file')
+			br
+			input(type='submit' value='Go!')
