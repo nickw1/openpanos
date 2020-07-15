@@ -118,7 +118,7 @@ class PanoModel {
 
     async deletePano(id) {
         const dbres = await this.db.query("DELETE FROM panoramas WHERE id=$1", [id]);
-        fs.unlink(`${process.env.PANOS_DIR}/${id}.jpg`);
+        fs.promises.unlink(`${process.env.PANOS_DIR}/${id}.jpg`);
         return true;
     }
 
