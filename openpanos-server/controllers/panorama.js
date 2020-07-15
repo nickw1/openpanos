@@ -6,7 +6,7 @@ const Photosphere = require('../models/photosphere');
 
 class PanoController { 
     constructor() {
-        this.canViewUnauthorised = (id) => 0;
+        this.canViewUnauthorised = (id) => 1;
     }
 
     async findById (req, res) {    

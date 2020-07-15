@@ -12,7 +12,7 @@ router.post('/:id/rotate', panorama.rotate.bind(panorama));
 router.post('/:id/move', panorama.move.bind(panorama));
 router.post('/move', panorama.moveMulti.bind(panorama));
 router.post('/upload', panorama.uploadPano.bind(panorama));
-router.post(':id/authorise', panorama.authorisePano.bind(panorama));
+router.post('/:id/authorise', panorama.authorisePano.bind(panorama));
 router.get('/:id(\\d+).jpg', panorama.getPanoImg.bind(panorama));
 router.delete('/:id(\\d+)', panorama.deletePano.bind(panorama));
 	
