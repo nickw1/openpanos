@@ -138,9 +138,11 @@ class PanoController {
                     } 
                         
                     let id = 0;
-                    if(props.lon !== null && props.lat !== null && /^-?[\d\.]+$/.test(props.lon) && /^-?[\d\.]+$/.test(props.lat)) {
+                    if(((props.lon !== null && props.lat !== null) || (req.body.lon !== undefined && req.body.lat !== undefined)) && /^-?[\d\.]+$/.test(props.lon) && /^-?[\d\.]+$/.test(props.lat)) {
                         const heading = props.poseheadingdegrees || 0;
-                        const geometry = `ST_GeomFromText('POINT(${props.lon} ${props.lat})', 4326)`;
+                        const lat = req.body.lat || props.lat;
+                        const lon = req.body.lon || props.lon;
+                        const geometry = `ST_GeomFromText('POINT(${lon} ${lat})', 4326)`;
                         const sql = (`INSERT INTO panoramas (the_geom, poseheadingdegrees, userid, timestamp, authorised) VALUES (${geometry}, ${heading}, 1, ${new Date(props.time).getTime() / 1000}, 0) RETURNING id`);
                         const dbres = await db.query(sql);
                         id = dbres.rows[0].id;
