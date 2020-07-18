@@ -5,8 +5,8 @@ const Photosphere = require('../models/photosphere');
 
 
 class PanoController { 
-    constructor() {
-        this.canViewUnauthorised = (id) => 1;
+    constructor(options = {}) {
+        this.panoAuthCheck = options.panoAuthCheck || false;
     }
 
     async findById (req, res) {    
@@ -142,8 +142,9 @@ class PanoController {
                         const heading = props.poseheadingdegrees || 0;
                         const lat = req.body.lat || props.lat;
                         const lon = req.body.lon || props.lon;
+                        const userid = req.session && req.session.userid ? req.session.userid: 0;
                         const geometry = `ST_GeomFromText('POINT(${lon} ${lat})', 4326)`;
-                        const sql = (`INSERT INTO panoramas (the_geom, poseheadingdegrees, userid, timestamp, authorised) VALUES (${geometry}, ${heading}, 1, ${new Date(props.time).getTime() / 1000}, 0) RETURNING id`);
+                        const sql = (`INSERT INTO panoramas (the_geom, poseheadingdegrees, userid, timestamp, authorised) VALUES (${geometry}, ${heading}, ${userid}, ${new Date(props.time).getTime() / 1000}, 0) RETURNING id`);
                         const dbres = await db.query(sql);
                         id = dbres.rows[0].id;
                     } else {
@@ -168,6 +169,10 @@ class PanoController {
                 }
             }
         }    
+    }
+
+    canViewUnauthorised(req, panodetails) {
+        return !this.panoAuthCheck || (req.session && (req.session.isadmin == 1 || req.session.userid == panodetails.userid));
     }
 
     createModel(req) {

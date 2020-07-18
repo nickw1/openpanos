@@ -1,9 +1,9 @@
 const fs = require('fs');
 
 class PanoModel {
-    constructor(options) {
+    constructor(options = {}) {
         this.db = options.db;
-        this.canViewUnauthorised = options.canViewUnauthorised || ( () =>  1 );
+        this.canViewUnauthorised = options.canViewUnauthorised || ( () =>  true );
     }
 
     setDb(db) {
