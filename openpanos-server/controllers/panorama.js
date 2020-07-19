@@ -142,7 +142,7 @@ class PanoController {
                         const heading = props.poseheadingdegrees || 0;
                         const lat = req.body.lat || props.lat;
                         const lon = req.body.lon || props.lon;
-                        const userid = req.session && req.session.userid ? req.session.userid: 0;
+                        const userid = req.user && req.user.userid ? req.user.userid: 0;
                         const geometry = `ST_GeomFromText('POINT(${lon} ${lat})', 4326)`;
                         const sql = (`INSERT INTO panoramas (the_geom, poseheadingdegrees, userid, timestamp, authorised) VALUES (${geometry}, ${heading}, ${userid}, ${new Date(props.time).getTime() / 1000}, 0) RETURNING id`);
                         const dbres = await db.query(sql);
@@ -172,7 +172,7 @@ class PanoController {
     }
 
     canViewUnauthorised(req, panodetails) {
-        return !this.panoAuthCheck || (req.session && (req.session.isadmin == 1 || req.session.userid == panodetails.userid));
+        return !this.panoAuthCheck || (req.user && (req.user.isadmin == 1 || req.user.userid == panodetails.userid));
     }
 
     createModel(req) {
