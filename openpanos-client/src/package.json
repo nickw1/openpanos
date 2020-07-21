@@ -1,10 +1,10 @@
 {
     "name": "openpanos-client",
     "version": "0.1.0",
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/nickw1/openpanos"
-	},
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/nickw1/openpanos"
+    },
     "description": "OpenPanos is a platform for creating linked, navigable networks of 360 panoramas. This is the Pannellum-based client component. You can use it either with openpanos-server or your own server.",
     "dependencies": {
         "jsfreemaplib": "^0.2.2",
