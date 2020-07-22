@@ -10,9 +10,13 @@ class PanoController {
     }
 
     async findById (req, res) {    
-        const model = this.createModel(req);
-        const row = await model.findById(req.params.id);    
-        res.json(row); 
+        try {
+            const model = this.createModel(req);
+            const row = await model.findById(req.params.id);    
+            res.json(row); 
+        } catch (e) {
+            res.status(500).send(`Error finding panorama: ${e}`);
+        }
     }
 
     async getPanoImg(req, res) {
@@ -21,47 +25,59 @@ class PanoController {
             const bytes = await model.getImage(req.params.id);
             res.set('content-type', 'image/jpeg').send(bytes);
         } catch(e) {
-            res.status(e.status).json({error: e.error});
+            res.status(e.status || 500).json({error: e.error || e});
         }
     }
 
 
     async findNearby (req,res) {
-        const model = this.createModel(req);
-        const results = await model.findNearby(req.params.id);
-        res.json(results);
+        try {
+            const model = this.createModel(req);
+            const results = await model.findNearby(req.params.id);
+            res.json(results);
+        } catch(e) {
+            res.status(500).send(`Error finding nearby panos: ${e}`);
+        }
     }
 
     async findNearest (req,res) {
-        if (/^-?[\d\.]+$/.test(req.params.lon) && /^-?[\d\.]+$/.test(req.params.lat)) {
-            const model = this.createModel(req);
-            const results = await model.findNearest(req.params.lon, req.params.lat);
-            res.json(results);
-        } else {
-            res.status(400).json([]);    
+        try {
+            if (/^-?[\d\.]+$/.test(req.params.lon) && /^-?[\d\.]+$/.test(req.params.lat)) {
+                const model = this.createModel(req);
+                const results = await model.findNearest(req.params.lon, req.params.lat);
+                res.json(results);
+            } else {
+                res.status(400).json([]);    
+            }
+        } catch(e) {
+            res.status(500).send(`Error finding nearest pano: ${e}`);
         }
     }
    
     async getByBbox(req,res) {
-        if(req.query.bbox !== undefined) {
-            const bb = req.query.bbox.split(",").filter( value => /^-?[\d\.]+$/.test(value));
-            if(bb.length == 4) {
-                const model = this.createModel(req);
-                const results = await model.getByBbox(bb);
-                res.json(results);
+        try {
+            if(req.query.bbox !== undefined) {
+                const bb = req.query.bbox.split(",").filter( value => /^-?[\d\.]+$/.test(value));
+                if(bb.length == 4) {
+                    const model = this.createModel(req);
+                    const results = await model.getByBbox(bb);
+                    res.json(results);
+                }
+            } else {
+                res.status(400).json({"error": "Please supply a bbox."});
             }
-        } else {
-            res.status(400).json({"error": "Please supply a bbox."});
+        } catch(e) {
+            res.status(500).send(`Error finding panos by bbox: ${e}`);
         }
     } 
 
     async getUnauthorised (req, res) {
-        if(false) {
-            res.status(401).json({"obj": JSON.stringify(this)});
-        } else {
+        try {
             const model = this.createModel(req);
             const result = await model.getUnauthorised();
             res.json(result);
+        } catch(e) {
+            res.status(500).send(`Error finding unauthorised panos: ${e}`);
         }
     }
     
@@ -71,7 +87,7 @@ class PanoController {
             const data = await model.rotate(req.params.id, req.body.poseheadingdegrees);
             res.json(data);
         } catch(e) {
-            res.status(e.status).json({error: e.error});
+            res.status(e.status || 500).json({error: e.error || e});
         }
     }
 
@@ -81,14 +97,18 @@ class PanoController {
             const data = await model.move(req.params.id, req.body.lon, req.body.lat);
             res.json(data);
         } catch(e) {
-            res.status(e.status).json({error: e.error});
+            res.status(e.status || 500).json({error: e.error || e});
         }
     }
 
     async moveMulti(req,res) {
-        const model = this.createModel(req);
-        await res.json(model.moveMulti(req.body));
-        res.send();
+        try {
+            const model = this.createModel(req);
+            await res.json(model.moveMulti(req.body));
+            res.send();
+        } catch(e) {
+            res.status(500).send(`Error moving multiple panos: ${e}`);
+        }
     }
 
     async deletePano(req, res) {
@@ -98,10 +118,10 @@ class PanoController {
                 await model.deletePano(req.params.id);
                 res.send();
             } catch(e) {
-                res.status(500).json({error: e});
+                res.status(500).json({error: `Cannot delete panorama: details ${e}`});
             }
         } else {
-            res.status(400);
+            res.status(400).json({error: 'Pano ID must be numeric.'});
         }
     }
 
@@ -112,10 +132,10 @@ class PanoController {
                 await model.authorisePano(req.params.id);
                 res.send();
             } catch(e) {
-                res.status(e.status).json({error: e.error});
+                res.status(e.status || 500).json({error: e.error || e});
             }    
         } else {
-            res.status(400);
+            res.status(400).json({error: 'Pano ID must be numeric.'});
         }
     }
 
