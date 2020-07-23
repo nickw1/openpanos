@@ -31,7 +31,7 @@ server-side API being available, see below for details. In particular, to load t
 to a given latitude and longitude.
 	- * You must have a **`nearest`** API endpoint setup, to find the nearest panoama server-side. `openpanos-server` will provide this for you, or use your own. See below.
 
-- `loadPanorama(id, options)` - will load a given panorama by ID.
+- `loadPanorama(id)` - will load a given panorama by ID.
 	- * You must have a **`byID`** API endpoint setup, to find the panorama with that ID. `openpanos-server` will provide this for you, or use your own. See below.
 
 - `moveTo(id)` - moves to an already-loaded panorama with a given ID.
@@ -40,7 +40,7 @@ to a given latitude and longitude.
 referenced by ID. The `properties` parameter is an object containing this
 metadata and can contain one or both of the following properties:
 	- `position` (a two-member array of longitude and latitude);
-	- `poseheadingdegrees' (a float, the bearing of the centre point of the panorama).
+	- `poseheadingdegrees` (a float, the bearing of the centre point of the panorama).
 
 - `on(eventname, eventhandler)`- handle events with an event handler function.
 The events that are currently handled are:
@@ -51,7 +51,7 @@ The events that are currently handled are:
 
 For OpenPanos to work, you need a server set up which will provide your panorama images, find panorama metadata by ID, find the nearest panorama to a given latitude and longitude, and find panoramas near to the current one.
 
-If you use `openpanos-server`, you do not need to do this as the endpoints are stup for you. Otherwise, these endpoints can be specified as options when you create your `Client` object:
+If you use `openpanos-server`, you do not need to do this as the endpoints are setup for you. Otherwise, these endpoints can be specified as options when you create your `Client` object:
 
 ```javascript
 const Client = new openpanos.Client({
@@ -59,7 +59,7 @@ const Client = new openpanos.Client({
 		byId: , // ... returns metadata of a panorama with a given ID
 		nearest: , // ... finds the nearest panorama to a given lat/lon
 		panoImg: , // ... returns the actual image of a panorama with a given ID
-		panoImgResized: , // ... returns the panorama image resized to a given pxiel width (optional)
+		panoImgResized: , // ... returns the panorama image resized to a given pixel width (optional)
 		geojson: , // returns GeoJSON of all routes (such as OSM ways) within a given bounding box
 		nearby: , // returns panoramas near to a given panorama
 	}
@@ -73,7 +73,7 @@ Each endpoint is described in detail below, along with its default value (which 
 - `userid`: the ID of the user the pano belongs to (optional)
 - `authorised`: is the panorama authorised yet? (optional)
 - `lon`: the longitude 
-- `lat`: the longitude 
+- `lat`: the latitude 
 - `poseheadingdegrees`: the bearing of the centre of the panorama.
 
 **`nearest` endpoint** (default `op/panorama/nearest/{lon}/{lat]`) : returns a JSON object containing the panorama nearest to the given lon and lat. **Returns the same JSON as `byID`**.
