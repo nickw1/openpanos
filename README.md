@@ -36,4 +36,4 @@ npm install openpanos-server
 
 ## Detailed Documentation ##
 
-*TODO* !
+Can be found in the `openpanos-client` and `openpanos-server` directories.

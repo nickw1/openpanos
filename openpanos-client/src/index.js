@@ -35,14 +35,8 @@ class Client {
                    });
     }
 
-    loadPanorama(id, options) {
-        options = options || {};
-        if(!this.panoMetadata[id]) {
-            this._fetchPanoMetadataById(id, this._processMetadata.bind(this, id, options));
-        } else {
-            this._setLonLat(this.panoMetadata[id].lon,this.panoMetadata[id].lat);
-            this._processMetadata(id, options);
-        }
+    loadPanorama(id) {
+        this._reloadPanorama(id, {});
     }
 
     moveTo(id) {
@@ -67,7 +61,7 @@ class Client {
                 });
                 this.panoMetadata[id].lon = properties.position[0];
                 this.panoMetadata[id].lat = properties.position[1];
-                this.loadPanorama(id, { panoMoved: true } );
+                this._reloadPanorama(id, { panoMoved: true } );
             } else if (properties.poseheadingdegrees) {
                 
                 var oldHeading = this.panoMetadata[id].poseheadingdegrees;
@@ -84,6 +78,16 @@ class Client {
 
     on(evName,evHandler) {
         this.eventHandlers[evName] = evHandler;
+    }
+
+    _reloadPanorama(id, options) {
+        options = options || {};
+        if(!this.panoMetadata[id]) {
+            this._fetchPanoMetadataById(id, this._processMetadata.bind(this, id, options));
+        } else {
+            this._setLonLat(this.panoMetadata[id].lon,this.panoMetadata[id].lat);
+            this._processMetadata(id, options);
+        }
     }
 
     _processMetadata(id, options) {
@@ -221,7 +225,7 @@ class Client {
             }
         });
         }
-        this.loadPanorama(id, {yaw: yawBearing});  
+        this._reloadPanorama(id, {yaw: yawBearing});  
     } 
 
     _adjustLoadedPano(curPanoId, panoYaw) {

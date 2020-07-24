@@ -29,7 +29,7 @@ server-side API being available, see below for details. In particular, to load t
 
 - `findPanoramaByLonLat(lon, lat)` : finds and loads the nearest panorama
 to a given latitude and longitude.
-	- * You must have a **`nearest`** API endpoint setup, to find the nearest panoama server-side. `openpanos-server` will provide this for you, or use your own. See below.
+	- * You must have a **`nearest`** API endpoint setup, to find the nearest panorama server-side. `openpanos-server` will provide this for you, or use your own. See below.
 
 - `loadPanorama(id)` - will load a given panorama by ID.
 	- * You must have a **`byID`** API endpoint setup, to find the panorama with that ID. `openpanos-server` will provide this for you, or use your own. See below.
