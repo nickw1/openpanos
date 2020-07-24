@@ -10,7 +10,7 @@ class Photosphere {
     
     async parseFile() {
         const ret = fs.readFile(this.file)
-            .then(f => { return exifr.parse(f, { xmp: true } ) })
+            .then(f => { return exifr.parse(f, { xmp: { parse: false } } ) })
             .then(exif => { 
                 // If we can't find exif at all, reject the promise
                 // handle this by deleting the file as it's likely to mean
