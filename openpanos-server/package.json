@@ -1,6 +1,6 @@
 {
   "name": "openpanos-server",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "description": "OpenPanos is a platform for creating linked, navigable networks of 360-degree panoramas. This is the server component, which works with an OpenStreetMap PostGIS database populated using osm2pgsql. Also see openpanos-client for the client component.",
   "repository": {
     "type": "git",

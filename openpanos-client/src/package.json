@@ -16,5 +16,10 @@
         "pannellum": "^2.5.6"
     },
     "author": "nickw",
-    "license": "GPL-3.0-or-later"
+    "license": "GPL-3.0-or-later",
+	"keywords": [
+		"openstreetmap", 
+		"panorama", 
+		"360"
+	]
 }

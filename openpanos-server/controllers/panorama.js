@@ -143,7 +143,7 @@ class PanoController {
         let warnings = []; 
         const maxFileSize = 8;
         const model = this.createModel(req); 
-        if (!req.files.file) {
+        if (!req.files || !req.files.file) {
             res.status(400).json({"error": "No panorama provided."});
         } else {
             if(req.files.file.size > 1048576 * maxFileSize) {
