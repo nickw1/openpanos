@@ -15,6 +15,7 @@ class PanoNetworkMgr {
 	}
 
     doLoadNearbys (json,callback) {
+		console.log(json);
         var html = "";
         var goog = new GoogleProjection(); 
 

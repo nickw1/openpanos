@@ -1,11 +1,12 @@
 {
   "name": "openpanos-demo-app",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "OpenPanos demo app",
   "main": "app.js",
   "dependencies": {
-    "openpanos-server": "^0.1.8",
     "openpanos-client": "^0.1.0",
+    "openpanos-server": "^0.1.8",
+    "photo-sphere-viewer": "^4.0.6",
     "pug": "^2.0.4"
   },
   "devDependencies": {
@@ -13,7 +14,7 @@
     "shx": "^0.3.2"
   },
   "scripts": {
-    "build": "browserify client/index.js > public/js/bundle.js && shx cp node_modules/pannellum/build/pannellum.css public/css"
+    "build": "browserify client/index.js > public/js/bundle.js && shx cp node_modules/photo-sphere-viewer/dist/*.css public/css && shx cp ../openpanos-client/images/arrow.png public/images"
   },
   "author": "nickw",
   "license": "GPL-3.0-or-later"

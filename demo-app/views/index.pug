@@ -2,11 +2,14 @@ doctype html
 html
 	head
 		title= title
-		script(type='text/javascript' src='js/bundle.js')
-		link(rel='stylesheet' type='text/css' href='css/pannellum.css')
+		script(type='text/javascript' src='js/bundle.js' defer)
+		link(rel='stylesheet' type='text/css' href='css/photo-sphere-viewer.css')
+		style(type='text/css'). 
+			body { font-family: helvetica, arial, sans-serif; }
+			a { text-decoration: none }
 	body
 		h1= title
-		div(id='panorama' style='width: 800px; height: 600px')
+		div(id='viewer' style='width: 800px; height: 600px')
 		p
 			a('href=/upload') Upload a panorama
 

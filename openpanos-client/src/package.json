@@ -1,6 +1,6 @@
 {
     "name": "openpanos-client",
-    "version": "0.1.1",
+    "version": "0.2.0",
     "repository": {
         "type": "git",
         "url": "https://github.com/nickw1/openpanos"
@@ -13,13 +13,13 @@
         "turf-point": "^2.0.1",
         "@turf/explode": "^5.1.0",
         "tinyqueue": "^2.0.0",
-        "pannellum": "^2.5.6"
+        "photo-sphere-viewer": "^4.0.6"
     },
     "author": "nickw",
     "license": "GPL-3.0-or-later",
-	"keywords": [
-		"openstreetmap", 
-		"panorama", 
-		"360"
-	]
+    "keywords": [
+        "openstreetmap",
+        "panorama",
+        "360"
+    ]
 }

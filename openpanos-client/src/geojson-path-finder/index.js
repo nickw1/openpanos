@@ -43,7 +43,7 @@ PathFinder.prototype = {
         var phantomEnd = this._createPhantom(finish);
 
         var path = findPath(this._graph.compactedVertices, start, finish);
-		console.log(`The found path from ${JSON.stringify(start)} to ${JSON.stringify(finish)} is: ${JSON.stringify(path)}`);
+//		console.log(`The found path from ${JSON.stringify(start)} to ${JSON.stringify(finish)} is: ${JSON.stringify(path)}`);
 
         if (path) {
             var weight = path[0];
