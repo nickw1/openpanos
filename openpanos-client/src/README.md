@@ -5,7 +5,7 @@ A platform for creating linked, navigable networks of 360 panoramas.
 OpenPanos is a platform for creating linked networks of 360 panoramas. It is based on the core engine of [OpenTrailView](https://opentrailview.org), a project to
 create 360 tours of paths and trails. It uses various other libraries:
 
-- [Pannellum](https://pannellum.org) - a flexible and powerful panorama viewing library, developed by Matthew Petroff.
+- [Photo Sphere Viewer](https://photo-sphere-viewer.js.org) - *NEW for version 0.2.0*, a flexible and powerful panorama viewing library, originally developed by Jéremy Heleine and enhanced by Damien Sorel.
 - [GeoJSON Path Finder](https://www.liedman.net/geojson-path-finder/) - a library to create a routing graph from GeoJSON and route between two points. Developed by
 Per Liedman; note that you have to currently use [my own fork](https://github.com/nickw1/geojson-path-finder) with OpenPanos (**included in this package**), 
 as it relies on a bugfix which has not been merged into master on the original project yet. This is likely to change.
@@ -13,7 +13,7 @@ as it relies on a bugfix which has not been merged into master on the original p
 OpenPanos consists of two parts, a **client** and a **server**. It is possible to use the client without the server if you provide your own server.
 
 ### The client ###
-The client (`openpanos-client`; this package) is Pannellum and GeoJSON Path Finder-based, and handles displaying and linking the panoramas.  By default, the client will work with the OpenPanos server. However this is configurable and you can connect it to your own PostGIS-based API.
+The client (`openpanos-client`; this package) is Photo Sphere Viewer and GeoJSON Path Finder-based, and handles displaying and linking the panoramas.  By default, the client will work with the OpenPanos server. However this is configurable and you can connect it to your own PostGIS-based API.
 
 #### Basic usage of the client ####
 

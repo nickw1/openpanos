@@ -1,4 +1,4 @@
-const openpanos = require('../../openpanos-client/src');
+const openpanos = require('openpanos-client');
 const qs = require('querystring');
 
 const parts = window.location.href.split('?');

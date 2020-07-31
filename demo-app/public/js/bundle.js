@@ -1,5 +1,5 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
-const openpanos = require('../../openpanos-client/src');
+const openpanos = require('openpanos-client');
 const qs = require('querystring');
 
 const parts = window.location.href.split('?');
@@ -14,1066 +14,7 @@ if(get.id) {
     client.loadPanorama(1);
 }
 
-},{"../../openpanos-client/src":13,"querystring":4}],2:[function(require,module,exports){
-// Copyright Joyent, Inc. and other Node contributors.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a
-// copy of this software and associated documentation files (the
-// "Software"), to deal in the Software without restriction, including
-// without limitation the rights to use, copy, modify, merge, publish,
-// distribute, sublicense, and/or sell copies of the Software, and to permit
-// persons to whom the Software is furnished to do so, subject to the
-// following conditions:
-//
-// The above copyright notice and this permission notice shall be included
-// in all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
-// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
-// USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-'use strict';
-
-// If obj.hasOwnProperty has been overridden, then calling
-// obj.hasOwnProperty(prop) will break.
-// See: https://github.com/joyent/node/issues/1707
-function hasOwnProperty(obj, prop) {
-  return Object.prototype.hasOwnProperty.call(obj, prop);
-}
-
-module.exports = function(qs, sep, eq, options) {
-  sep = sep || '&';
-  eq = eq || '=';
-  var obj = {};
-
-  if (typeof qs !== 'string' || qs.length === 0) {
-    return obj;
-  }
-
-  var regexp = /\+/g;
-  qs = qs.split(sep);
-
-  var maxKeys = 1000;
-  if (options && typeof options.maxKeys === 'number') {
-    maxKeys = options.maxKeys;
-  }
-
-  var len = qs.length;
-  // maxKeys <= 0 means that we should not limit keys count
-  if (maxKeys > 0 && len > maxKeys) {
-    len = maxKeys;
-  }
-
-  for (var i = 0; i < len; ++i) {
-    var x = qs[i].replace(regexp, '%20'),
-        idx = x.indexOf(eq),
-        kstr, vstr, k, v;
-
-    if (idx >= 0) {
-      kstr = x.substr(0, idx);
-      vstr = x.substr(idx + 1);
-    } else {
-      kstr = x;
-      vstr = '';
-    }
-
-    k = decodeURIComponent(kstr);
-    v = decodeURIComponent(vstr);
-
-    if (!hasOwnProperty(obj, k)) {
-      obj[k] = v;
-    } else if (isArray(obj[k])) {
-      obj[k].push(v);
-    } else {
-      obj[k] = [obj[k], v];
-    }
-  }
-
-  return obj;
-};
-
-var isArray = Array.isArray || function (xs) {
-  return Object.prototype.toString.call(xs) === '[object Array]';
-};
-
-},{}],3:[function(require,module,exports){
-// Copyright Joyent, Inc. and other Node contributors.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a
-// copy of this software and associated documentation files (the
-// "Software"), to deal in the Software without restriction, including
-// without limitation the rights to use, copy, modify, merge, publish,
-// distribute, sublicense, and/or sell copies of the Software, and to permit
-// persons to whom the Software is furnished to do so, subject to the
-// following conditions:
-//
-// The above copyright notice and this permission notice shall be included
-// in all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
-// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
-// USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-'use strict';
-
-var stringifyPrimitive = function(v) {
-  switch (typeof v) {
-    case 'string':
-      return v;
-
-    case 'boolean':
-      return v ? 'true' : 'false';
-
-    case 'number':
-      return isFinite(v) ? v : '';
-
-    default:
-      return '';
-  }
-};
-
-module.exports = function(obj, sep, eq, name) {
-  sep = sep || '&';
-  eq = eq || '=';
-  if (obj === null) {
-    obj = undefined;
-  }
-
-  if (typeof obj === 'object') {
-    return map(objectKeys(obj), function(k) {
-      var ks = encodeURIComponent(stringifyPrimitive(k)) + eq;
-      if (isArray(obj[k])) {
-        return map(obj[k], function(v) {
-          return ks + encodeURIComponent(stringifyPrimitive(v));
-        }).join(sep);
-      } else {
-        return ks + encodeURIComponent(stringifyPrimitive(obj[k]));
-      }
-    }).join(sep);
-
-  }
-
-  if (!name) return '';
-  return encodeURIComponent(stringifyPrimitive(name)) + eq +
-         encodeURIComponent(stringifyPrimitive(obj));
-};
-
-var isArray = Array.isArray || function (xs) {
-  return Object.prototype.toString.call(xs) === '[object Array]';
-};
-
-function map (xs, f) {
-  if (xs.map) return xs.map(f);
-  var res = [];
-  for (var i = 0; i < xs.length; i++) {
-    res.push(f(xs[i], i));
-  }
-  return res;
-}
-
-var objectKeys = Object.keys || function (obj) {
-  var res = [];
-  for (var key in obj) {
-    if (Object.prototype.hasOwnProperty.call(obj, key)) res.push(key);
-  }
-  return res;
-};
-
-},{}],4:[function(require,module,exports){
-'use strict';
-
-exports.decode = exports.parse = require('./decode');
-exports.encode = exports.stringify = require('./encode');
-
-},{"./decode":2,"./encode":3}],5:[function(require,module,exports){
-const turfDistance = require('@turf/distance').default;
-const turfPoint = require('turf-point');
-
-class JunctionManager {
-
-    constructor(pathFinder) {
-        this.pathFinder = pathFinder;
-    }
-
-    findNearestJunction(p) {
-        const graph = this.pathFinder.serialize();
-        const vertex = [ null, Number.MAX_VALUE ];
-        let nEdges;
-
-        const junctions = Object.keys(graph.vertices).filter ( k => {
-            nEdges = Object.keys(graph.vertices[k]).length;
-            return nEdges >= 3 || nEdges == 1;
-        });
-
-        junctions.forEach(k => {
-            const dist = turfDistance(turfPoint(p), turfPoint(graph.sourceVertices[k]));
-            if(dist < vertex[1]) {
-                vertex[1] = dist;
-                vertex[0] = graph.sourceVertices[k].slice(0);
-            }
-        });
-        return vertex;
-    }
-
-    snapToJunction(p, distThreshold) {
-        const p2 =  p.slice(0);
-        const junction = this.findNearestJunction(p);
-        if(junction[1] < distThreshold) {
-            p2[0] = junction[0][0];
-            p2[1] = junction[0][1];
-        }
-        return p2;
-    }
-}
-
-module.exports = JunctionManager;
-
-},{"@turf/distance":15,"turf-point":35}],6:[function(require,module,exports){
-const jsFreemaplib = require('jsfreemaplib');
-const GoogleProjection = jsFreemaplib.GoogleProjection;
-const PathFinder = require('./geojson-path-finder'); 
-const BoundingBox = jsFreemaplib.BoundingBox;
-const JunctionManager = require('./JunctionManager');
-const turfPoint = require('turf-point');
-const turfBearing = require('@turf/bearing').default;
-
-class PanoNetworkMgr {
-
-	constructor(options) {
-		this.options = options || { };
-		this.options.jsonApi = this.options.jsonApi || 'op/map/highways';
-		this.options.nearbyApi = this.options.nearbyApi || 'op/panorama/{id}/nearby';
-	}
-
-    doLoadNearbys (json,callback) {
-		console.log(json);
-        var html = "";
-        var goog = new GoogleProjection(); 
-
-        var pois = [];
-        json.lon = parseFloat(json.lon);
-        json.lat = parseFloat(json.lat);
-        json.poseheadingdegrees = parseFloat(json.poseheadingdegrees);
-        var projected=[goog.lonToGoogle(json.lon), goog.latToGoogle(json.lat)];
-
-        fetch(this.options.nearbyApi.replace('{id}',json.id))
-            .then(resp => resp.json())
-            .then(nearbys=> {
-                fetch(`${this.options.jsonApi}?bbox=${nearbys.bbox.join(",")}`)
-                .then(resp => resp.json())
-                .then(geojson => {
-                    pois.push(json);
-                    nearbys.panos.forEach (nearby => { 
-                        html += `Nearby Panorama: ${nearby.id} ${nearby.lat},${nearby.lon}<br />`;
-                        nearby.lon = parseFloat(nearby.lon);
-                        nearby.lat = parseFloat(nearby.lat);
-                        pois.push(nearby);
-                        
-                    } );    
-            
-                    geojson = this.insertIntoNetwork(geojson, pois);
-                    var includedNearbys = [];
-
-                    var pathFinder = new PathFinder(geojson, { precision: 0.00001, edgeDataReduceFn: (e)=> { } } );
-                    const jMgr = new JunctionManager(pathFinder);
-                    // NEW - once we've created the graph, snap the current and nearby panos to the nearest junction within 5m, if there is one
-                    const snappedNodes = [ null, null ];
-                    snappedNodes[0] = jMgr.snapToJunction([json.lon, json.lat], 0.005);
-                    nearbys.panos.forEach(nearby=> {
-                        nearby.lon = parseFloat(nearby.lon);
-                        nearby.lat = parseFloat(nearby.lat);
-                        nearby.poseheadingdegrees = parseFloat(nearby.poseheadingdegrees);
-                        nearby.bearing = 720;
-                        snappedNodes[1] = jMgr.snapToJunction([nearby.lon, nearby.lat], 0.005);
-                        
-                        var route = this.calcPath(pathFinder, snappedNodes);
-
-                        if(route!=null && route.path.length>=2) {
-                            var bearing = turfBearing(turfPoint(route.path[0]), turfPoint(route.path[1]));
-
-                            if(bearing < 0) bearing += 360;
-                            nearby.bearing = bearing;
-                            nearby.weight = route.weight;
-                        }
-                    });
-                    var sorted = nearbys.panos.filter((nearby)=>nearby.bearing<=360).sort((nearby1,nearby2)=>(nearby1.bearing-nearby2.bearing)); 
-                    var lastBearing = 720;
-                    var includedBearings = [];
-                    var curNearbys = [];
-                    var nearbysSortedByBearing = [];
-        
-                    for(var i=0; i<sorted.length; i++) {
-                        if(Math.abs(sorted[i].bearing-lastBearing) >= 5) {
-                        // new bearing
-                            includedBearings.push(sorted[i].bearing);
-                            curNearbys = [];
-                            nearbysSortedByBearing.push(curNearbys);
-                        }
-                        curNearbys.push(sorted[i]);
-                        lastBearing = sorted[i].bearing;
-                    }
-
-                    nearbysSortedByBearing.forEach ( (n)=> {
-                        includedNearbys.push(n.sort((n1,n2)=>n1.weight-n2.weight)[0]);
-                    });
-                    callback(json, includedNearbys);
-            });
-        });
-    }
-
-
-    insertIntoNetwork (json, pois) {
-        var newFeatures = [];
-        var k = 0, z = 0;
-        json.features.forEach( way => { way.bbox = jsFreemaplib.getBoundingBox(way.geometry.coordinates); });
-        pois.forEach(poi => {
-            var point = [poi.lon, poi.lat];
-            poi.overallLowestDist= { distance: Number.MAX_VALUE };
-            json.features.filter(way => way.bbox.contains(point)).forEach(way => {
-                
-                var lowestDist = {distance: Number.MAX_VALUE}, idx = -1, curDist;
-                for(var j=0; j<way.geometry.coordinates.length-1; j++) {
-                    curDist = jsFreemaplib.haversineDistToLine(
-                            poi.lon,     
-                            poi.lat, 
-                            way.geometry.coordinates[j], 
-                            way.geometry.coordinates[j+1]);    
-                    if(curDist!==null && curDist.distance >=0 && curDist.distance < lowestDist.distance) {
-                        lowestDist=curDist;
-                        idx=j;
-                    }
-                }    
-
-                
-                if(idx >=0 && lowestDist.distance < 10.0) {
-                    // it has to be within 10m of a way 
-                    // We don't yet actually try and split the way though
-                    // We need to ensure the POI is inserted into the
-                    // CORRECT way (the closest) - aka the "panorama 16
-                    // problem". So for the moment we
-                    // just create an array of POTENTIAL splits for this
-                    // POI, and take the one closest to a way later.
-                    if(lowestDist.distance < poi.overallLowestDist.distance) {
-                        poi.overallLowestDist.distance = lowestDist.distance;
-                        poi.overallLowestDist.idx = idx + lowestDist.proportion;
-                        poi.overallLowestDist.way = way;
-                    }
-                }
-            }); 
-        } ); 
-
-        const allSplits = {};
-
-        // allSplits will now contain all COUNTED splits (one split per POI),
-        // indexed by way ID, so we can then go on and consider all real splits
-        // for a way, as we did before.
-        // don't need this now 
-        pois.filter(poi => poi.overallLowestDist.distance < Number.MAX_VALUE).forEach(poi => {
-            const way = poi.overallLowestDist.way;
-            if(allSplits[way.properties.osm_id] === undefined) allSplits[way.properties.osm_id] = [];
-            allSplits[way.properties.osm_id].push({idx: poi.overallLowestDist.idx, poi: poi, way: way});
-        });
-
-        // now we need to loop through the ways again 
-        json.features.forEach ( way => {
-            let splits = allSplits[way.properties.osm_id];    
-            // this was originally in the ways loop
-            if(splits && splits.length>0) {
-                splits = splits.sort((a,b)=>a.idx-b.idx);
-                var splitIdx = 0;
-                var newWay = this.makeNewWay(way); 
-                var i = 0;
-                while (i < way.geometry.coordinates.length) {
-                    newWay.geometry.coordinates.push([way.geometry.coordinates[i][0], way.geometry.coordinates[i][1]]);
-                    while(splitIdx < splits.length && Math.floor(splits[splitIdx].idx) == i) {
-
-                        newWay.geometry.coordinates.push([splits[splitIdx].poi.lon, splits[splitIdx].poi.lat, splits[splitIdx].poi.id]);
-                        splitIdx++;
-                    }
-                    i++;    
-                }
-                newFeatures[k++] = newWay;
-            } else {
-                newFeatures[k++] = way;
-            }
-        });
-        json.features = newFeatures;
-        return json;
-    }
-
-    calcPath (pathFinder, points) {
-
-        var f1 = { geometry: { type: 'Point',
-            coordinates: points[0] }},
-            f2 = { geometry: { type: 'Point',
-            coordinates: points[1] }};
-
-        return pathFinder.findPath(f1, f2);
-    }
-
-    makeNewWay(way) {
-        var newWay = {type:'Feature'};
-        newWay.properties =  way.properties; 
-        newWay.geometry = {};
-        newWay.geometry.type =  'LineString';
-        newWay.geometry.coordinates = [];
-        return newWay;
-    }
-}
-
-module.exports = PanoNetworkMgr;
-
-},{"./JunctionManager":5,"./geojson-path-finder":9,"@turf/bearing":14,"jsfreemaplib":30,"turf-point":35}],7:[function(require,module,exports){
-'use strict';
-
-module.exports = {
-    compactNode: compactNode,
-    compactGraph: compactGraph
-};
-
-function findNextEnd(prev, v, vertices, ends, vertexCoords, edgeData, trackIncoming, options) {
-    var weight = vertices[prev][v],
-        reverseWeight = vertices[v][prev],
-        coordinates = [],
-        path = [],
-        reducedEdge = options.edgeDataSeed;
-        
-    if (options.edgeDataReduceFn) {
-        reducedEdge = options.edgeDataReduceFn(reducedEdge, edgeData[v][prev]);
-    }
-
-    while (!ends[v]) {
-        var edges = vertices[v];
-
-        if (!edges) { break; }
-
-        var next = Object.keys(edges).filter(function notPrevious(k) { return k !== prev; })[0];
-        weight += edges[next];
-
-        if (trackIncoming) {
-            reverseWeight += vertices[next][v];
-
-            if (path.indexOf(v) >= 0) {
-                ends[v] = vertices[v];
-                break;
-            }
-            path.push(v);
-        }
-
-        if (options.edgeDataReduceFn) {
-            reducedEdge = options.edgeDataReduceFn(reducedEdge, edgeData[v][next]);
-        }
-
-        coordinates.push(vertexCoords[v]);
-        prev = v;
-        v = next;
-    }
-
-    return {
-        vertex: v,
-        weight: weight,
-        reverseWeight: reverseWeight,
-        coordinates: coordinates,
-        reducedEdge: reducedEdge
-    };
-}
-
-function compactNode(k, vertices, ends, vertexCoords, edgeData, trackIncoming, options) {
-    options = options || {};
-    var neighbors = vertices[k];
-    return Object.keys(neighbors).reduce(function compactEdge(result, j) {
-        var neighbor = findNextEnd(k, j, vertices, ends, vertexCoords, edgeData, trackIncoming, options);
-        var weight = neighbor.weight;
-        var reverseWeight = neighbor.reverseWeight;
-        if (neighbor.vertex !== k) {
-            if (!result.edges[neighbor.vertex] || result.edges[neighbor.vertex] > weight) {
-                result.edges[neighbor.vertex] = weight;
-                result.coordinates[neighbor.vertex] = [vertexCoords[k]].concat(neighbor.coordinates);
-                result.reducedEdges[neighbor.vertex] = neighbor.reducedEdge;
-            }
-            if (trackIncoming && 
-                !isNaN(reverseWeight) && (!result.incomingEdges[neighbor.vertex] || result.incomingEdges[neighbor.vertex] > reverseWeight)) {
-                result.incomingEdges[neighbor.vertex] = reverseWeight;
-                var coordinates = [vertexCoords[k]].concat(neighbor.coordinates);
-                coordinates.reverse();
-                result.incomingCoordinates[neighbor.vertex] = coordinates;
-            }
-        }
-        return result;
-    }, {edges: {}, incomingEdges: {}, coordinates: {}, incomingCoordinates: {}, reducedEdges: {}});
-}
-
-function compactGraph(vertices, vertexCoords, edgeData, options) {
-    options = options || {};
-    var progress = options.progress;
-    var ends = Object.keys(vertices).reduce(function findEnds(es, k, i, vs) {
-        var vertex = vertices[k];
-        var edges = Object.keys(vertex);
-		// A vertex has edges (defined as the remote vertex key) as keys and edge lengths as values
-        var numberEdges = edges.length;
-        var remove;
-
-		options.compact = true;
-
-        if(options.compact === false) {
-            remove = false;
-        } else if (numberEdges === 1) {
-			// we remove if there isn't a loaded vertex corresponding to the remote vertex. this doesn't happen often but conceivable on an edge of a network if the remote vertex is never loaded, perhaps
-            var other = vertices[edges[0]];
-            remove = !other[k];
-        } else if (numberEdges === 2) {
-			// The problem is here.
-			
-            remove = edges.filter(function(n) {
-                return vertices[n][k];
-            }).length === numberEdges;
-		
-        } else {
-            remove = false;
-        }
-
-        if (!remove) {
-            es[k] = vertex;
-        }
-
-        if (i % 1000 === 0 && progress) {
-            progress('compact:ends', i, vs.length);
-        }
-
-        return es;
-    }, {});
-
-    return Object.keys(ends).reduce(function compactEnd(result, k, i, es) {
-        var compacted = compactNode(k, vertices, ends, vertexCoords, edgeData, false, options);
-        result.graph[k] = compacted.edges;
-        result.coordinates[k] = compacted.coordinates;
-
-        if (options.edgeDataReduceFn) {
-            result.reducedEdges[k] = compacted.reducedEdges;
-        }
-
-        if (i % 1000 === 0 && progress) {
-            progress('compact:nodes', i, es.length);
-        }
-
-        return result;
-    }, {graph: {}, coordinates: {}, reducedEdges: {}});
-};
-
-},{}],8:[function(require,module,exports){
-var Queue = require('tinyqueue');
-
-module.exports = function(graph, start, end) {
-    var costs = {};
-    costs[start] = 0;
-    var initialState = [0, [start], start];
-    var queue = new Queue([initialState], function(a, b) { return a[0] - b[0]; });
-    var explored = {};
-
-    while (queue.length) {
-        var state = queue.pop();
-        var cost = state[0];
-        var node = state[2];
-        if (node === end) {
-			// dijkstra all good - the correct path is returned
-            return state.slice(0, 2);
-        }
-
-        var neighbours = graph[node];
-        Object.keys(neighbours).forEach(function(n) {
-            var newCost = cost + neighbours[n];
-            if (!(n in costs) || newCost < costs[n]) {
-                costs[n] = newCost;
-                var newState = [newCost, state[1].concat([n]), n];
-                queue.push(newState);
-            }
-        });
-    }
-
-    return null;
-}
-
-},{"tinyqueue":34}],9:[function(require,module,exports){
-'use strict';
-
-var findPath = require('./dijkstra'),
-    preprocess = require('./preprocessor'),
-    compactor = require('./compactor'),
-    roundCoord = require('./round-coord'),
-    distance = require('@turf/distance').default,
-    point = require('turf-point');
-
-module.exports = PathFinder;
-
-function PathFinder(graph, options) {    
-    options = options || {};
-
-    if (!graph.compactedVertices) {
-        graph = preprocess(graph, options);
-    }
-
-    this._graph = graph;
-    this._keyFn = options.keyFn || function(c) {
-        return c.join(',');
-    };
-    this._precision = options.precision || 1e-5;
-    this._options = options;
-
-    if (Object.keys(this._graph.compactedVertices).filter(function(k) { return k !== 'edgeData'; }).length === 0) {
-        throw new Error('Compacted graph contains no forks (topology has no intersections).');
-    }
-}
-
-PathFinder.prototype = {
-    findPath: function(a, b) {
-        var start = this._keyFn(roundCoord(a.geometry.coordinates, this._precision)),
-            finish = this._keyFn(roundCoord(b.geometry.coordinates, this._precision));
-
-        // We can't find a path if start or finish isn't in the
-        // set of non-compacted vertices
-        if (!this._graph.vertices[start] || !this._graph.vertices[finish]) {
-            return null;
-        }
-
-        var phantomStart = this._createPhantom(start);
-        var phantomEnd = this._createPhantom(finish);
-
-        var path = findPath(this._graph.compactedVertices, start, finish);
-//		console.log(`The found path from ${JSON.stringify(start)} to ${JSON.stringify(finish)} is: ${JSON.stringify(path)}`);
-
-        if (path) {
-            var weight = path[0];
-            path = path[1];
-            return {
-                path: path.reduce(function buildPath(cs, v, i, vs) {
-                    if (i > 0) {
-                        cs = cs.concat(this._graph.compactedCoordinates[vs[i - 1]][v]);
-                    }
-
-                    return cs;
-                }.bind(this), []).concat([this._graph.sourceVertices[finish]]),
-                weight: weight,
-                edgeDatas: this._graph.compactedEdges 
-                    ? path.reduce(function buildEdgeData(eds, v, i, vs) {
-                        if (i > 0) {
-                            eds.push({
-                                reducedEdge: this._graph.compactedEdges[vs[i - 1]][v]
-                            });
-                        }
-
-                        return eds;
-                    }.bind(this), [])
-                    : undefined
-            };
-        } else {
-            return null;
-        }
-
-        this._removePhantom(phantomStart);
-        this._removePhantom(phantomEnd);
-    },
-
-    serialize: function() {
-        return this._graph;
-    },
-
-	findNearestJunction: function(p) {
-		var vertex = [ null, Number.MAX_VALUE ], nEdges;
-		var junctions = Object.keys(this._graph.vertices).filter ( (function(k) {
-			nEdges = Object.keys(this._graph.vertices[k]).length;
-			return nEdges >= 3 || nEdges == 1;
-		}).bind(this));
-
-		junctions.forEach( (function(k) {
-			const dist = distance(point(p), point(this._graph.sourceVertices[k]));
-			if(dist < vertex[1]) {
-				vertex[1] = dist;
-				vertex[0] = this._graph.sourceVertices[k].slice(0);
-			}
-		}).bind(this));
-		return vertex;
-	},
-		
-    _createPhantom: function(n) {
-        if (this._graph.compactedVertices[n]) return null;
-
-        var phantom = compactor.compactNode(n, this._graph.vertices, this._graph.compactedVertices, this._graph.sourceVertices, this._graph.edgeData, true, this._options);
-        this._graph.compactedVertices[n] = phantom.edges;
-        this._graph.compactedCoordinates[n] = phantom.coordinates;
-
-        if (this._graph.compactedEdges) {
-            this._graph.compactedEdges[n] = phantom.reducedEdges;
-        }
-
-        Object.keys(phantom.incomingEdges).forEach(function(neighbor) {
-            var neighborKeys = Object.keys(this._graph.compactedCoordinates[neighbor]);
-			var neighborExactPos = neighborKeys.length > 0 ? this._graph.compactedCoordinates[neighbor][neighborKeys[0]][0] : neighbor.split(',').map(function(v) { return parseFloat(v); });
-            this._graph.compactedVertices[neighbor][n] = phantom.incomingEdges[neighbor];
-            this._graph.compactedCoordinates[neighbor][n] = [neighborExactPos].concat(phantom.incomingCoordinates[neighbor].slice(0, -1));
-            if (this._graph.compactedEdges) {
-                this._graph.compactedEdges[neighbor][n] = phantom.reducedEdges[neighbor];
-            }
-        }.bind(this));
-
-        return n;
-    },
-
-    _removePhantom: function(n) {
-        if (!n) return;
-
-        Object.keys(this._graph.compactedVertices[n]).forEach(function(neighbor) {
-            delete this._graph.compactedVertices[neighbor][n];
-        }.bind(this));
-        Object.keys(this._graph.compactedCoordinates[n]).forEach(function(neighbor) {
-            delete this._graph.compactedCoordinates[neighbor][n];
-        }.bind(this));
-        if (this._graph.compactedEdges) {
-            Object.keys(this._graph.compactedEdges[n]).forEach(function(neighbor) {
-                delete this._graph.compactedEdges[neighbor][n];
-            }.bind(this));
-        }
-
-        delete this._graph.compactedVertices[n];
-        delete this._graph.compactedCoordinates[n];
-
-        if (this._graph.compactedEdges) {
-            delete this._graph.compactedEdges[n];
-        }
-    }
-};
-
-},{"./compactor":7,"./dijkstra":8,"./preprocessor":10,"./round-coord":11,"@turf/distance":15,"turf-point":35}],10:[function(require,module,exports){
-'use strict';
-
-var topology = require('./topology'),
-    compactor = require('./compactor'),
-    distance = require('@turf/distance').default,
-    roundCoord = require('./round-coord'),
-    point = require('turf-point');
-
-module.exports = function preprocess(graph, options) {
-    options = options || {};
-    var weightFn = options.weightFn || function defaultWeightFn(a, b) {
-            return distance(point(a), point(b));
-        },
-        topo;
-
-    if (graph.type === 'FeatureCollection') {
-        // Graph is GeoJSON data, create a topology from it
-        topo = topology(graph, options);
-    } else if (graph.edges) {
-        // Graph is a preprocessed topology
-        topo = graph;
-    }
-
-    var graph = topo.edges.reduce(function buildGraph(g, edge, i, es) {
-        var a = edge[0],
-            b = edge[1],
-            props = edge[2],
-            w = weightFn(topo.vertices[a], topo.vertices[b], props),
-            makeEdgeList = function makeEdgeList(node) {
-                if (!g.vertices[node]) {
-                    g.vertices[node] = {};
-                    if (options.edgeDataReduceFn) {
-                        g.edgeData[node] = {};
-                    }
-                }
-            },
-            concatEdge = function concatEdge(startNode, endNode, weight) {
-                var v = g.vertices[startNode];
-                v[endNode] = weight;
-                if (options.edgeDataReduceFn) {
-                    g.edgeData[startNode][endNode] = options.edgeDataReduceFn(options.edgeDataSeed, props);
-                }
-            };
-
-        if (w) {
-            makeEdgeList(a);
-            makeEdgeList(b);
-            if (w instanceof Object) {
-                if (w.forward) {
-                    concatEdge(a, b, w.forward);
-                }
-                if (w.backward) {
-                    concatEdge(b, a, w.backward);
-                }
-            } else {
-                concatEdge(a, b, w);
-                concatEdge(b, a, w);
-            }
-        }
-
-        if (i % 1000 === 0 && options.progress) {
-            options.progress('edgeweights', i,es.length);
-        }
-
-        return g;
-    }, {edgeData: {}, vertices: {}});
-
-    var compact = compactor.compactGraph(graph.vertices, topo.vertices, graph.edgeData, options);
-
-    return {
-        vertices: graph.vertices,
-        edgeData: graph.edgeData,
-        sourceVertices: topo.vertices,
-        compactedVertices: compact.graph,
-        compactedCoordinates: compact.coordinates,
-        compactedEdges: options.edgeDataReduceFn ? compact.reducedEdges : null
-    };
-};
-
-},{"./compactor":7,"./round-coord":11,"./topology":12,"@turf/distance":15,"turf-point":35}],11:[function(require,module,exports){
-module.exports = function roundCoord(c, precision) {
-	/*
-    return [
-        Math.round(c[0] / precision) * precision,
-        Math.round(c[1] / precision) * precision,
-    ];
-	*/
-	return [
-		c[0].toFixed(-Math.log10(precision)),
-		c[1].toFixed(-Math.log10(precision))
-	];
-};
-
-},{}],12:[function(require,module,exports){
-'use strict';
-
-var explode = require('@turf/explode'),
-    roundCoord = require('./round-coord');
-
-module.exports = topology;
-
-function geoJsonReduce(geojson, fn, seed) {
-    if (geojson.type === 'FeatureCollection') {
-        return geojson.features.reduce(function reduceFeatures(a, f) {
-            return geoJsonReduce(f, fn, a);
-        }, seed);
-    } else {
-        return fn(seed, geojson);
-    }
-}
-
-function geoJsonFilterFeatures(geojson, fn) {
-    var features = [];
-    if (geojson.type === 'FeatureCollection') {
-        features = features.concat(geojson.features.filter(fn));
-    }
-
-    return {
-        type: 'FeatureCollection',
-        features: features
-    };
-}
-
-function isLineString(f) {
-    return f.geometry.type === 'LineString';
-}
-
-function topology(geojson, options) {
-    options = options || {};
-    var keyFn = options.keyFn || function defaultKeyFn(c) {
-            return c.join(',');
-        },
-        precision = options.precision || 1e-5;
-
-    var lineStrings = geoJsonFilterFeatures(geojson, isLineString);
-    var explodedLineStrings = explode(lineStrings);
-    var vertices = explodedLineStrings.features.reduce(function buildTopologyVertices(cs, f, i, fs) {
-            var rc = roundCoord(f.geometry.coordinates, precision);
-            cs[keyFn(rc)] = f.geometry.coordinates;
-
-            if (i % 1000 === 0 && options.progress) {
-                options.progress('topo:vertices', i, fs.length);
-            }
-
-            return cs;
-        }, {}),
-        edges = geoJsonReduce(lineStrings, function buildTopologyEdges(es, f, i, fs) {
-            f.geometry.coordinates.forEach(function buildLineStringEdges(c, i, cs) {
-                if (i > 0) {
-                    var k1 = keyFn(roundCoord(cs[i - 1], precision)),
-                        k2 = keyFn(roundCoord(c, precision));
-                    es.push([k1, k2, f.properties]);
-                }
-            });
-
-            if (i % 1000 === 0 && options.progress) {
-                options.progress('topo:edges', i, fs.length);
-            }
-
-            return es;
-        }, []);
-
-    return {
-        vertices: vertices,
-        edges: edges
-    };
-}
-
-},{"./round-coord":11,"@turf/explode":16}],13:[function(require,module,exports){
-const PanoNetworkMgr = require('./PanoNetworkMgr');
-const PhotoSphereViewer = require('photo-sphere-viewer');
-const MarkersPlugin = require('photo-sphere-viewer/dist/plugins/markers');
-
-class Client {
-
-    constructor(options) {
-        options = options || { };
-        options.api = options.api || { };
-        this.viewer = new PhotoSphereViewer.Viewer({
-            container: document.querySelector(options.container || '#viewer'),
-            plugins: [
-                MarkersPlugin
-            ]
-        });
-        this.panoNetworkMgr = new PanoNetworkMgr({
-            jsonApi: options.api.geojson,
-            nearbyApi: options.api.nearby
-        });
-        this.lat = 0.0;
-        this.lon = 0.0;
-        this.eventHandlers = {};
-        this.resizePano = options.resizePano;
-        this.api = { };
-        this.api.nearest = options.api.nearest || 'op/panorama/nearest/{lon}/{lat}'; 
-        this.api.byId = options.api.byId || 'op/panorama/{id}';
-        this.api.panoImg = options.api.panoImg || 'op/panorama/{id}.jpg';
-        this.api.panoImgResized = options.api.panoImgResized || 'op/panorama/{id}.w{width}.jpg';
-        this.nearbys = { };
-        this.panoMetadata = { };
-        this.markersPlugin = this.viewer.getPlugin(MarkersPlugin);
-        this.markersPlugin.on("select-marker", (e, marker, data) => {
-            const id = parseInt(marker.id.split('-')[1]);
-            this.moveTo(id);
-        });
-        this.arrowImage = options.arrowImage || 'images/arrow.png';
-        this.curPanoId = 0;
-    }
-
-
-    async findPanoramaByLonLat(lon,lat) {
-        const json = await fetch(this.api.nearest
-                .replace('{lon}', lon)
-                .replace('{lat}', lat))
-                .then(resp=>resp.json());
-        this.loadPanorama(json.id);
-    }
-
-    async loadPanorama(id) {
-        if(!this.panoMetadata[id]) {
-             await this._loadPanoMetadata(id);
-        }
-        this.viewer.setPanorama(
-            this.resizePano === undefined ? 
-                this.api.panoImg.replace('{id}', id) : 
-                this.api.panoImgResized
-                    .replace('{id}', id)
-                    .replace('{width}', this.resizePano), {
-            sphereCorrection: { 
-                pan: -this.panoMetadata[id].poseheadingdegrees * Math.PI / 180.0
-            } 
-        });
-        if(!this.panoMetadata[id].nearbys) {
-            this.panoNetworkMgr.doLoadNearbys(
-                this.panoMetadata[id],
-                this._onFoundNearbys.bind(this)
-            );
-        } else {
-            this._createMarkers(id);
-        }
-    }
-
-    moveTo(id) {
-        this.markersPlugin.clearMarkers();
-        this.loadPanorama(id);
-    }
-
-    update(id, properties) {
-        if(this.panoMetadata[id]) {
-            if(properties.position) {
-                this.panoMetadata[id].lon = properties.position[0];
-                this.panoMetadata[id].lat = properties.position[1];
-            } else if (properties.poseheadingdegrees) {
-                this.panoMetadata[id].poseheadingdegrees = properties.poseheadingdegrees;
-            }
-            if(this.curPanoId == id) {    
-                this.moveTo(id);
-            }
-        }
-    }
-
-    on(evName,evHandler) {
-        this.eventHandlers[evName] = evHandler;
-    }
-
-    async _loadPanoMetadata(id) {
-        this.panoMetadata[id] = await fetch(this.api.byId.replace('{id}', id))
-                                .then(response => response.json());
-        return this.panoMetadata[id];
-    }
-
-    _onFoundNearbys(origPano, nearbys) {
-        this.panoMetadata[origPano.id].nearbys = nearbys;
-        this._createMarkers(origPano.id);
-    }
-
-    _createMarkers(id) {
-
-        this.curPanoId = id;
-
-        if(this.eventHandlers.panoChanged) {
-            this.eventHandlers.panoChanged(id);
-        }
-
-        if(this.eventHandlers.locationChanged) {
-            this.eventHandlers.locationChanged(this.panoMetadata[id].lon, this.panoMetadata[id].lat);
-        }
-
-        this.panoMetadata[id].nearbys.forEach ( nearby => {
-            nearby.key = `${id}-${nearby.id}`;
-            let yaw = nearby.bearing;
-            console.log(`Adding marker with ${nearby.key} yaw is ${yaw}`);
-            this.markersPlugin.addMarker({
-                id: `#${id}-${nearby.id}`,
-                latitude: 10 * Math.PI/180,
-                longitude: `${yaw}deg`,
-                image: this.arrowImage,
-                width: 64,
-                height: 64,
-                data: {
-                    generated: true 
-                } 
-            });
-        });
-    }
-
-    _showMarkers(id) {
-        this.panoMetadata[id].nearbys.forEach(nearby => {
-            this.markersPlugin.showMarker(nearby.key);
-        });
-    }
-
-    _hideMarkers(id) {
-        this.panoMetadata[id].nearbys.forEach(nearby => {
-            this.markersPlugin.hideMarker(nearby.key);
-        });
-    }
-}
-
-module.exports = {
-    Client: Client
-};
-
-},{"./PanoNetworkMgr":6,"photo-sphere-viewer":31,"photo-sphere-viewer/dist/plugins/markers":32}],14:[function(require,module,exports){
+},{"openpanos-client":27,"querystring":32}],2:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var helpers_1 = require("@turf/helpers");
@@ -1135,7 +76,7 @@ function calculateFinalBearing(start, end) {
 }
 exports.default = bearing;
 
-},{"@turf/helpers":18,"@turf/invariant":19}],15:[function(require,module,exports){
+},{"@turf/helpers":6,"@turf/invariant":7}],3:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var invariant_1 = require("@turf/invariant");
@@ -1178,7 +119,7 @@ function distance(from, to, options) {
 }
 exports.default = distance;
 
-},{"@turf/helpers":18,"@turf/invariant":19}],16:[function(require,module,exports){
+},{"@turf/helpers":6,"@turf/invariant":7}],4:[function(require,module,exports){
 'use strict';
 
 var meta = require('@turf/meta');
@@ -1218,7 +159,7 @@ function explode(geojson) {
 module.exports = explode;
 module.exports.default = explode;
 
-},{"@turf/helpers":17,"@turf/meta":20}],17:[function(require,module,exports){
+},{"@turf/helpers":5,"@turf/meta":8}],5:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', { value: true });
@@ -2011,7 +952,7 @@ exports.radiansToDistance = radiansToDistance;
 exports.bearingToAngle = bearingToAngle;
 exports.convertDistance = convertDistance;
 
-},{}],18:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 /**
@@ -2746,7 +1687,7 @@ function convertDistance() {
 }
 exports.convertDistance = convertDistance;
 
-},{}],19:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var helpers_1 = require("@turf/helpers");
@@ -2959,7 +1900,7 @@ function getType(geojson, name) {
 }
 exports.getType = getType;
 
-},{"@turf/helpers":18}],20:[function(require,module,exports){
+},{"@turf/helpers":6}],8:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', { value: true });
@@ -4086,9 +3027,9 @@ exports.lineReduce = lineReduce;
 exports.findSegment = findSegment;
 exports.findPoint = findPoint;
 
-},{"@turf/helpers":21}],21:[function(require,module,exports){
-arguments[4][17][0].apply(exports,arguments)
-},{"dup":17}],22:[function(require,module,exports){
+},{"@turf/helpers":9}],9:[function(require,module,exports){
+arguments[4][5][0].apply(exports,arguments)
+},{"dup":5}],10:[function(require,module,exports){
 
 class BoundingBox {
 
@@ -4115,7 +3056,7 @@ class BoundingBox {
 module.exports = BoundingBox;
 
 
-},{}],23:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 // Direct conversion of freemaplib's DEM class to JavaScript.
 
 class DEM  {
@@ -4186,7 +3127,7 @@ class DEM  {
 module.exports = DEM;
 
 
-},{}],24:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 
 function Dialog(parentId,callbacks,style)
 {
@@ -4274,7 +3215,7 @@ Dialog.prototype.setCallback = function(btn, cb)
 
 module.exports = Dialog;
 
-},{}],25:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 
 
 const Tile = require('./Tile');
@@ -4337,7 +3278,7 @@ class GoogleProjection  {
 
 module.exports = GoogleProjection;
 
-},{"./Tile":28}],26:[function(require,module,exports){
+},{"./Tile":16}],14:[function(require,module,exports){
 const Tiler = require('./Tiler');
 
 class JsonTiler extends Tiler {
@@ -4354,7 +3295,7 @@ class JsonTiler extends Tiler {
 
 module.exports = JsonTiler;
 
-},{"./Tiler":29}],27:[function(require,module,exports){
+},{"./Tiler":17}],15:[function(require,module,exports){
 const Dialog = require('./Dialog');
 
 function Nominatim(options) {
@@ -4402,7 +3343,7 @@ function Nominatim(options) {
 
 module.exports = Nominatim;
 
-},{"./Dialog":24}],28:[function(require,module,exports){
+},{"./Dialog":12}],16:[function(require,module,exports){
 
 class Tile {
         
@@ -4432,7 +3373,7 @@ class Tile {
 
 module.exports = Tile;
 
-},{}],29:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 const GoogleProjection = require('./GoogleProjection');
 const Tile = require('./Tile');
 
@@ -4509,7 +3450,7 @@ class Tiler {
 
 module.exports = Tiler;
 
-},{"./GoogleProjection":25,"./Tile":28}],30:[function(require,module,exports){
+},{"./GoogleProjection":13,"./Tile":16}],18:[function(require,module,exports){
 const GoogleProjection = require('./GoogleProjection');
 const Tiler = require('./Tiler');
 const Tile = require('./Tile'); 
@@ -4581,7 +3522,886 @@ module.exports = {
     }
 };
 
-},{"./BoundingBox":22,"./DEM":23,"./Dialog":24,"./GoogleProjection":25,"./JsonTiler":26,"./Nominatim":27,"./Tile":28,"./Tiler":29}],31:[function(require,module,exports){
+},{"./BoundingBox":10,"./DEM":11,"./Dialog":12,"./GoogleProjection":13,"./JsonTiler":14,"./Nominatim":15,"./Tile":16,"./Tiler":17}],19:[function(require,module,exports){
+const turfDistance = require('@turf/distance').default;
+const turfPoint = require('turf-point');
+
+class JunctionManager {
+
+    constructor(pathFinder) {
+        this.pathFinder = pathFinder;
+    }
+
+    findNearestJunction(p) {
+        const graph = this.pathFinder.serialize();
+        const vertex = [ null, Number.MAX_VALUE ];
+        let nEdges;
+
+        const junctions = Object.keys(graph.vertices).filter ( k => {
+            nEdges = Object.keys(graph.vertices[k]).length;
+            return nEdges >= 3 || nEdges == 1;
+        });
+
+        junctions.forEach(k => {
+            const dist = turfDistance(turfPoint(p), turfPoint(graph.sourceVertices[k]));
+            if(dist < vertex[1]) {
+                vertex[1] = dist;
+                vertex[0] = graph.sourceVertices[k].slice(0);
+            }
+        });
+        return vertex;
+    }
+
+    snapToJunction(p, distThreshold) {
+        const p2 =  p.slice(0);
+        const junction = this.findNearestJunction(p);
+        if(junction[1] < distThreshold) {
+            p2[0] = junction[0][0];
+            p2[1] = junction[0][1];
+        }
+        return p2;
+    }
+}
+
+module.exports = JunctionManager;
+
+},{"@turf/distance":3,"turf-point":35}],20:[function(require,module,exports){
+const jsFreemaplib = require('jsfreemaplib');
+const GoogleProjection = jsFreemaplib.GoogleProjection;
+const PathFinder = require('./geojson-path-finder'); 
+const BoundingBox = jsFreemaplib.BoundingBox;
+const JunctionManager = require('./JunctionManager');
+const turfPoint = require('turf-point');
+const turfBearing = require('@turf/bearing').default;
+
+class PanoNetworkMgr {
+
+	constructor(options) {
+		this.options = options || { };
+		this.options.jsonApi = this.options.jsonApi || 'op/map/highways';
+		this.options.nearbyApi = this.options.nearbyApi || 'op/panorama/{id}/nearby';
+	}
+
+    doLoadNearbys (json,callback) {
+		console.log(json);
+        var html = "";
+        var goog = new GoogleProjection(); 
+
+        var pois = [];
+        json.lon = parseFloat(json.lon);
+        json.lat = parseFloat(json.lat);
+        json.poseheadingdegrees = parseFloat(json.poseheadingdegrees);
+        var projected=[goog.lonToGoogle(json.lon), goog.latToGoogle(json.lat)];
+
+        fetch(this.options.nearbyApi.replace('{id}',json.id))
+            .then(resp => resp.json())
+            .then(nearbys=> {
+                fetch(`${this.options.jsonApi}?bbox=${nearbys.bbox.join(",")}`)
+                .then(resp => resp.json())
+                .then(geojson => {
+                    pois.push(json);
+                    nearbys.panos.forEach (nearby => { 
+                        html += `Nearby Panorama: ${nearby.id} ${nearby.lat},${nearby.lon}<br />`;
+                        nearby.lon = parseFloat(nearby.lon);
+                        nearby.lat = parseFloat(nearby.lat);
+                        pois.push(nearby);
+                        
+                    } );    
+            
+                    geojson = this.insertIntoNetwork(geojson, pois);
+                    var includedNearbys = [];
+
+                    var pathFinder = new PathFinder(geojson, { precision: 0.00001, edgeDataReduceFn: (e)=> { } } );
+                    const jMgr = new JunctionManager(pathFinder);
+                    // NEW - once we've created the graph, snap the current and nearby panos to the nearest junction within 5m, if there is one
+                    const snappedNodes = [ null, null ];
+                    snappedNodes[0] = jMgr.snapToJunction([json.lon, json.lat], 0.005);
+                    nearbys.panos.forEach(nearby=> {
+                        nearby.lon = parseFloat(nearby.lon);
+                        nearby.lat = parseFloat(nearby.lat);
+                        nearby.poseheadingdegrees = parseFloat(nearby.poseheadingdegrees);
+                        nearby.bearing = 720;
+                        snappedNodes[1] = jMgr.snapToJunction([nearby.lon, nearby.lat], 0.005);
+                        
+                        var route = this.calcPath(pathFinder, snappedNodes);
+
+                        if(route!=null && route.path.length>=2) {
+                            var bearing = turfBearing(turfPoint(route.path[0]), turfPoint(route.path[1]));
+
+                            if(bearing < 0) bearing += 360;
+                            nearby.bearing = bearing;
+                            nearby.weight = route.weight;
+                        }
+                    });
+                    var sorted = nearbys.panos.filter((nearby)=>nearby.bearing<=360).sort((nearby1,nearby2)=>(nearby1.bearing-nearby2.bearing)); 
+                    var lastBearing = 720;
+                    var includedBearings = [];
+                    var curNearbys = [];
+                    var nearbysSortedByBearing = [];
+        
+                    for(var i=0; i<sorted.length; i++) {
+                        if(Math.abs(sorted[i].bearing-lastBearing) >= 5) {
+                        // new bearing
+                            includedBearings.push(sorted[i].bearing);
+                            curNearbys = [];
+                            nearbysSortedByBearing.push(curNearbys);
+                        }
+                        curNearbys.push(sorted[i]);
+                        lastBearing = sorted[i].bearing;
+                    }
+
+                    nearbysSortedByBearing.forEach ( (n)=> {
+                        includedNearbys.push(n.sort((n1,n2)=>n1.weight-n2.weight)[0]);
+                    });
+                    callback(json, includedNearbys);
+            });
+        });
+    }
+
+
+    insertIntoNetwork (json, pois) {
+        var newFeatures = [];
+        var k = 0, z = 0;
+        json.features.forEach( way => { way.bbox = jsFreemaplib.getBoundingBox(way.geometry.coordinates); });
+        pois.forEach(poi => {
+            var point = [poi.lon, poi.lat];
+            poi.overallLowestDist= { distance: Number.MAX_VALUE };
+            json.features.filter(way => way.bbox.contains(point)).forEach(way => {
+                
+                var lowestDist = {distance: Number.MAX_VALUE}, idx = -1, curDist;
+                for(var j=0; j<way.geometry.coordinates.length-1; j++) {
+                    curDist = jsFreemaplib.haversineDistToLine(
+                            poi.lon,     
+                            poi.lat, 
+                            way.geometry.coordinates[j], 
+                            way.geometry.coordinates[j+1]);    
+                    if(curDist!==null && curDist.distance >=0 && curDist.distance < lowestDist.distance) {
+                        lowestDist=curDist;
+                        idx=j;
+                    }
+                }    
+
+                
+                if(idx >=0 && lowestDist.distance < 10.0) {
+                    // it has to be within 10m of a way 
+                    // We don't yet actually try and split the way though
+                    // We need to ensure the POI is inserted into the
+                    // CORRECT way (the closest) - aka the "panorama 16
+                    // problem". So for the moment we
+                    // just create an array of POTENTIAL splits for this
+                    // POI, and take the one closest to a way later.
+                    if(lowestDist.distance < poi.overallLowestDist.distance) {
+                        poi.overallLowestDist.distance = lowestDist.distance;
+                        poi.overallLowestDist.idx = idx + lowestDist.proportion;
+                        poi.overallLowestDist.way = way;
+                    }
+                }
+            }); 
+        } ); 
+
+        const allSplits = {};
+
+        // allSplits will now contain all COUNTED splits (one split per POI),
+        // indexed by way ID, so we can then go on and consider all real splits
+        // for a way, as we did before.
+        // don't need this now 
+        pois.filter(poi => poi.overallLowestDist.distance < Number.MAX_VALUE).forEach(poi => {
+            const way = poi.overallLowestDist.way;
+            if(allSplits[way.properties.osm_id] === undefined) allSplits[way.properties.osm_id] = [];
+            allSplits[way.properties.osm_id].push({idx: poi.overallLowestDist.idx, poi: poi, way: way});
+        });
+
+        // now we need to loop through the ways again 
+        json.features.forEach ( way => {
+            let splits = allSplits[way.properties.osm_id];    
+            // this was originally in the ways loop
+            if(splits && splits.length>0) {
+                splits = splits.sort((a,b)=>a.idx-b.idx);
+                var splitIdx = 0;
+                var newWay = this.makeNewWay(way); 
+                var i = 0;
+                while (i < way.geometry.coordinates.length) {
+                    newWay.geometry.coordinates.push([way.geometry.coordinates[i][0], way.geometry.coordinates[i][1]]);
+                    while(splitIdx < splits.length && Math.floor(splits[splitIdx].idx) == i) {
+
+                        newWay.geometry.coordinates.push([splits[splitIdx].poi.lon, splits[splitIdx].poi.lat, splits[splitIdx].poi.id]);
+                        splitIdx++;
+                    }
+                    i++;    
+                }
+                newFeatures[k++] = newWay;
+            } else {
+                newFeatures[k++] = way;
+            }
+        });
+        json.features = newFeatures;
+        return json;
+    }
+
+    calcPath (pathFinder, points) {
+
+        var f1 = { geometry: { type: 'Point',
+            coordinates: points[0] }},
+            f2 = { geometry: { type: 'Point',
+            coordinates: points[1] }};
+
+        return pathFinder.findPath(f1, f2);
+    }
+
+    makeNewWay(way) {
+        var newWay = {type:'Feature'};
+        newWay.properties =  way.properties; 
+        newWay.geometry = {};
+        newWay.geometry.type =  'LineString';
+        newWay.geometry.coordinates = [];
+        return newWay;
+    }
+}
+
+module.exports = PanoNetworkMgr;
+
+},{"./JunctionManager":19,"./geojson-path-finder":23,"@turf/bearing":2,"jsfreemaplib":18,"turf-point":35}],21:[function(require,module,exports){
+'use strict';
+
+module.exports = {
+    compactNode: compactNode,
+    compactGraph: compactGraph
+};
+
+function findNextEnd(prev, v, vertices, ends, vertexCoords, edgeData, trackIncoming, options) {
+    var weight = vertices[prev][v],
+        reverseWeight = vertices[v][prev],
+        coordinates = [],
+        path = [],
+        reducedEdge = options.edgeDataSeed;
+        
+    if (options.edgeDataReduceFn) {
+        reducedEdge = options.edgeDataReduceFn(reducedEdge, edgeData[v][prev]);
+    }
+
+    while (!ends[v]) {
+        var edges = vertices[v];
+
+        if (!edges) { break; }
+
+        var next = Object.keys(edges).filter(function notPrevious(k) { return k !== prev; })[0];
+        weight += edges[next];
+
+        if (trackIncoming) {
+            reverseWeight += vertices[next][v];
+
+            if (path.indexOf(v) >= 0) {
+                ends[v] = vertices[v];
+                break;
+            }
+            path.push(v);
+        }
+
+        if (options.edgeDataReduceFn) {
+            reducedEdge = options.edgeDataReduceFn(reducedEdge, edgeData[v][next]);
+        }
+
+        coordinates.push(vertexCoords[v]);
+        prev = v;
+        v = next;
+    }
+
+    return {
+        vertex: v,
+        weight: weight,
+        reverseWeight: reverseWeight,
+        coordinates: coordinates,
+        reducedEdge: reducedEdge
+    };
+}
+
+function compactNode(k, vertices, ends, vertexCoords, edgeData, trackIncoming, options) {
+    options = options || {};
+    var neighbors = vertices[k];
+    return Object.keys(neighbors).reduce(function compactEdge(result, j) {
+        var neighbor = findNextEnd(k, j, vertices, ends, vertexCoords, edgeData, trackIncoming, options);
+        var weight = neighbor.weight;
+        var reverseWeight = neighbor.reverseWeight;
+        if (neighbor.vertex !== k) {
+            if (!result.edges[neighbor.vertex] || result.edges[neighbor.vertex] > weight) {
+                result.edges[neighbor.vertex] = weight;
+                result.coordinates[neighbor.vertex] = [vertexCoords[k]].concat(neighbor.coordinates);
+                result.reducedEdges[neighbor.vertex] = neighbor.reducedEdge;
+            }
+            if (trackIncoming && 
+                !isNaN(reverseWeight) && (!result.incomingEdges[neighbor.vertex] || result.incomingEdges[neighbor.vertex] > reverseWeight)) {
+                result.incomingEdges[neighbor.vertex] = reverseWeight;
+                var coordinates = [vertexCoords[k]].concat(neighbor.coordinates);
+                coordinates.reverse();
+                result.incomingCoordinates[neighbor.vertex] = coordinates;
+            }
+        }
+        return result;
+    }, {edges: {}, incomingEdges: {}, coordinates: {}, incomingCoordinates: {}, reducedEdges: {}});
+}
+
+function compactGraph(vertices, vertexCoords, edgeData, options) {
+    options = options || {};
+    var progress = options.progress;
+    var ends = Object.keys(vertices).reduce(function findEnds(es, k, i, vs) {
+        var vertex = vertices[k];
+        var edges = Object.keys(vertex);
+		// A vertex has edges (defined as the remote vertex key) as keys and edge lengths as values
+        var numberEdges = edges.length;
+        var remove;
+
+		options.compact = true;
+
+        if(options.compact === false) {
+            remove = false;
+        } else if (numberEdges === 1) {
+			// we remove if there isn't a loaded vertex corresponding to the remote vertex. this doesn't happen often but conceivable on an edge of a network if the remote vertex is never loaded, perhaps
+            var other = vertices[edges[0]];
+            remove = !other[k];
+        } else if (numberEdges === 2) {
+			// The problem is here.
+			
+            remove = edges.filter(function(n) {
+                return vertices[n][k];
+            }).length === numberEdges;
+		
+        } else {
+            remove = false;
+        }
+
+        if (!remove) {
+            es[k] = vertex;
+        }
+
+        if (i % 1000 === 0 && progress) {
+            progress('compact:ends', i, vs.length);
+        }
+
+        return es;
+    }, {});
+
+    return Object.keys(ends).reduce(function compactEnd(result, k, i, es) {
+        var compacted = compactNode(k, vertices, ends, vertexCoords, edgeData, false, options);
+        result.graph[k] = compacted.edges;
+        result.coordinates[k] = compacted.coordinates;
+
+        if (options.edgeDataReduceFn) {
+            result.reducedEdges[k] = compacted.reducedEdges;
+        }
+
+        if (i % 1000 === 0 && progress) {
+            progress('compact:nodes', i, es.length);
+        }
+
+        return result;
+    }, {graph: {}, coordinates: {}, reducedEdges: {}});
+};
+
+},{}],22:[function(require,module,exports){
+var Queue = require('tinyqueue');
+
+module.exports = function(graph, start, end) {
+    var costs = {};
+    costs[start] = 0;
+    var initialState = [0, [start], start];
+    var queue = new Queue([initialState], function(a, b) { return a[0] - b[0]; });
+    var explored = {};
+
+    while (queue.length) {
+        var state = queue.pop();
+        var cost = state[0];
+        var node = state[2];
+        if (node === end) {
+			// dijkstra all good - the correct path is returned
+            return state.slice(0, 2);
+        }
+
+        var neighbours = graph[node];
+        Object.keys(neighbours).forEach(function(n) {
+            var newCost = cost + neighbours[n];
+            if (!(n in costs) || newCost < costs[n]) {
+                costs[n] = newCost;
+                var newState = [newCost, state[1].concat([n]), n];
+                queue.push(newState);
+            }
+        });
+    }
+
+    return null;
+}
+
+},{"tinyqueue":34}],23:[function(require,module,exports){
+'use strict';
+
+var findPath = require('./dijkstra'),
+    preprocess = require('./preprocessor'),
+    compactor = require('./compactor'),
+    roundCoord = require('./round-coord'),
+    distance = require('@turf/distance').default,
+    point = require('turf-point');
+
+module.exports = PathFinder;
+
+function PathFinder(graph, options) {    
+    options = options || {};
+
+    if (!graph.compactedVertices) {
+        graph = preprocess(graph, options);
+    }
+
+    this._graph = graph;
+    this._keyFn = options.keyFn || function(c) {
+        return c.join(',');
+    };
+    this._precision = options.precision || 1e-5;
+    this._options = options;
+
+    if (Object.keys(this._graph.compactedVertices).filter(function(k) { return k !== 'edgeData'; }).length === 0) {
+        throw new Error('Compacted graph contains no forks (topology has no intersections).');
+    }
+}
+
+PathFinder.prototype = {
+    findPath: function(a, b) {
+        var start = this._keyFn(roundCoord(a.geometry.coordinates, this._precision)),
+            finish = this._keyFn(roundCoord(b.geometry.coordinates, this._precision));
+
+        // We can't find a path if start or finish isn't in the
+        // set of non-compacted vertices
+        if (!this._graph.vertices[start] || !this._graph.vertices[finish]) {
+            return null;
+        }
+
+        var phantomStart = this._createPhantom(start);
+        var phantomEnd = this._createPhantom(finish);
+
+        var path = findPath(this._graph.compactedVertices, start, finish);
+//		console.log(`The found path from ${JSON.stringify(start)} to ${JSON.stringify(finish)} is: ${JSON.stringify(path)}`);
+
+        if (path) {
+            var weight = path[0];
+            path = path[1];
+            return {
+                path: path.reduce(function buildPath(cs, v, i, vs) {
+                    if (i > 0) {
+                        cs = cs.concat(this._graph.compactedCoordinates[vs[i - 1]][v]);
+                    }
+
+                    return cs;
+                }.bind(this), []).concat([this._graph.sourceVertices[finish]]),
+                weight: weight,
+                edgeDatas: this._graph.compactedEdges 
+                    ? path.reduce(function buildEdgeData(eds, v, i, vs) {
+                        if (i > 0) {
+                            eds.push({
+                                reducedEdge: this._graph.compactedEdges[vs[i - 1]][v]
+                            });
+                        }
+
+                        return eds;
+                    }.bind(this), [])
+                    : undefined
+            };
+        } else {
+            return null;
+        }
+
+        this._removePhantom(phantomStart);
+        this._removePhantom(phantomEnd);
+    },
+
+    serialize: function() {
+        return this._graph;
+    },
+
+	findNearestJunction: function(p) {
+		var vertex = [ null, Number.MAX_VALUE ], nEdges;
+		var junctions = Object.keys(this._graph.vertices).filter ( (function(k) {
+			nEdges = Object.keys(this._graph.vertices[k]).length;
+			return nEdges >= 3 || nEdges == 1;
+		}).bind(this));
+
+		junctions.forEach( (function(k) {
+			const dist = distance(point(p), point(this._graph.sourceVertices[k]));
+			if(dist < vertex[1]) {
+				vertex[1] = dist;
+				vertex[0] = this._graph.sourceVertices[k].slice(0);
+			}
+		}).bind(this));
+		return vertex;
+	},
+		
+    _createPhantom: function(n) {
+        if (this._graph.compactedVertices[n]) return null;
+
+        var phantom = compactor.compactNode(n, this._graph.vertices, this._graph.compactedVertices, this._graph.sourceVertices, this._graph.edgeData, true, this._options);
+        this._graph.compactedVertices[n] = phantom.edges;
+        this._graph.compactedCoordinates[n] = phantom.coordinates;
+
+        if (this._graph.compactedEdges) {
+            this._graph.compactedEdges[n] = phantom.reducedEdges;
+        }
+
+        Object.keys(phantom.incomingEdges).forEach(function(neighbor) {
+            var neighborKeys = Object.keys(this._graph.compactedCoordinates[neighbor]);
+			var neighborExactPos = neighborKeys.length > 0 ? this._graph.compactedCoordinates[neighbor][neighborKeys[0]][0] : neighbor.split(',').map(function(v) { return parseFloat(v); });
+            this._graph.compactedVertices[neighbor][n] = phantom.incomingEdges[neighbor];
+            this._graph.compactedCoordinates[neighbor][n] = [neighborExactPos].concat(phantom.incomingCoordinates[neighbor].slice(0, -1));
+            if (this._graph.compactedEdges) {
+                this._graph.compactedEdges[neighbor][n] = phantom.reducedEdges[neighbor];
+            }
+        }.bind(this));
+
+        return n;
+    },
+
+    _removePhantom: function(n) {
+        if (!n) return;
+
+        Object.keys(this._graph.compactedVertices[n]).forEach(function(neighbor) {
+            delete this._graph.compactedVertices[neighbor][n];
+        }.bind(this));
+        Object.keys(this._graph.compactedCoordinates[n]).forEach(function(neighbor) {
+            delete this._graph.compactedCoordinates[neighbor][n];
+        }.bind(this));
+        if (this._graph.compactedEdges) {
+            Object.keys(this._graph.compactedEdges[n]).forEach(function(neighbor) {
+                delete this._graph.compactedEdges[neighbor][n];
+            }.bind(this));
+        }
+
+        delete this._graph.compactedVertices[n];
+        delete this._graph.compactedCoordinates[n];
+
+        if (this._graph.compactedEdges) {
+            delete this._graph.compactedEdges[n];
+        }
+    }
+};
+
+},{"./compactor":21,"./dijkstra":22,"./preprocessor":24,"./round-coord":25,"@turf/distance":3,"turf-point":35}],24:[function(require,module,exports){
+'use strict';
+
+var topology = require('./topology'),
+    compactor = require('./compactor'),
+    distance = require('@turf/distance').default,
+    roundCoord = require('./round-coord'),
+    point = require('turf-point');
+
+module.exports = function preprocess(graph, options) {
+    options = options || {};
+    var weightFn = options.weightFn || function defaultWeightFn(a, b) {
+            return distance(point(a), point(b));
+        },
+        topo;
+
+    if (graph.type === 'FeatureCollection') {
+        // Graph is GeoJSON data, create a topology from it
+        topo = topology(graph, options);
+    } else if (graph.edges) {
+        // Graph is a preprocessed topology
+        topo = graph;
+    }
+
+    var graph = topo.edges.reduce(function buildGraph(g, edge, i, es) {
+        var a = edge[0],
+            b = edge[1],
+            props = edge[2],
+            w = weightFn(topo.vertices[a], topo.vertices[b], props),
+            makeEdgeList = function makeEdgeList(node) {
+                if (!g.vertices[node]) {
+                    g.vertices[node] = {};
+                    if (options.edgeDataReduceFn) {
+                        g.edgeData[node] = {};
+                    }
+                }
+            },
+            concatEdge = function concatEdge(startNode, endNode, weight) {
+                var v = g.vertices[startNode];
+                v[endNode] = weight;
+                if (options.edgeDataReduceFn) {
+                    g.edgeData[startNode][endNode] = options.edgeDataReduceFn(options.edgeDataSeed, props);
+                }
+            };
+
+        if (w) {
+            makeEdgeList(a);
+            makeEdgeList(b);
+            if (w instanceof Object) {
+                if (w.forward) {
+                    concatEdge(a, b, w.forward);
+                }
+                if (w.backward) {
+                    concatEdge(b, a, w.backward);
+                }
+            } else {
+                concatEdge(a, b, w);
+                concatEdge(b, a, w);
+            }
+        }
+
+        if (i % 1000 === 0 && options.progress) {
+            options.progress('edgeweights', i,es.length);
+        }
+
+        return g;
+    }, {edgeData: {}, vertices: {}});
+
+    var compact = compactor.compactGraph(graph.vertices, topo.vertices, graph.edgeData, options);
+
+    return {
+        vertices: graph.vertices,
+        edgeData: graph.edgeData,
+        sourceVertices: topo.vertices,
+        compactedVertices: compact.graph,
+        compactedCoordinates: compact.coordinates,
+        compactedEdges: options.edgeDataReduceFn ? compact.reducedEdges : null
+    };
+};
+
+},{"./compactor":21,"./round-coord":25,"./topology":26,"@turf/distance":3,"turf-point":35}],25:[function(require,module,exports){
+module.exports = function roundCoord(c, precision) {
+	/*
+    return [
+        Math.round(c[0] / precision) * precision,
+        Math.round(c[1] / precision) * precision,
+    ];
+	*/
+	return [
+		c[0].toFixed(-Math.log10(precision)),
+		c[1].toFixed(-Math.log10(precision))
+	];
+};
+
+},{}],26:[function(require,module,exports){
+'use strict';
+
+var explode = require('@turf/explode'),
+    roundCoord = require('./round-coord');
+
+module.exports = topology;
+
+function geoJsonReduce(geojson, fn, seed) {
+    if (geojson.type === 'FeatureCollection') {
+        return geojson.features.reduce(function reduceFeatures(a, f) {
+            return geoJsonReduce(f, fn, a);
+        }, seed);
+    } else {
+        return fn(seed, geojson);
+    }
+}
+
+function geoJsonFilterFeatures(geojson, fn) {
+    var features = [];
+    if (geojson.type === 'FeatureCollection') {
+        features = features.concat(geojson.features.filter(fn));
+    }
+
+    return {
+        type: 'FeatureCollection',
+        features: features
+    };
+}
+
+function isLineString(f) {
+    return f.geometry.type === 'LineString';
+}
+
+function topology(geojson, options) {
+    options = options || {};
+    var keyFn = options.keyFn || function defaultKeyFn(c) {
+            return c.join(',');
+        },
+        precision = options.precision || 1e-5;
+
+    var lineStrings = geoJsonFilterFeatures(geojson, isLineString);
+    var explodedLineStrings = explode(lineStrings);
+    var vertices = explodedLineStrings.features.reduce(function buildTopologyVertices(cs, f, i, fs) {
+            var rc = roundCoord(f.geometry.coordinates, precision);
+            cs[keyFn(rc)] = f.geometry.coordinates;
+
+            if (i % 1000 === 0 && options.progress) {
+                options.progress('topo:vertices', i, fs.length);
+            }
+
+            return cs;
+        }, {}),
+        edges = geoJsonReduce(lineStrings, function buildTopologyEdges(es, f, i, fs) {
+            f.geometry.coordinates.forEach(function buildLineStringEdges(c, i, cs) {
+                if (i > 0) {
+                    var k1 = keyFn(roundCoord(cs[i - 1], precision)),
+                        k2 = keyFn(roundCoord(c, precision));
+                    es.push([k1, k2, f.properties]);
+                }
+            });
+
+            if (i % 1000 === 0 && options.progress) {
+                options.progress('topo:edges', i, fs.length);
+            }
+
+            return es;
+        }, []);
+
+    return {
+        vertices: vertices,
+        edges: edges
+    };
+}
+
+},{"./round-coord":25,"@turf/explode":4}],27:[function(require,module,exports){
+const PanoNetworkMgr = require('./PanoNetworkMgr');
+const PhotoSphereViewer = require('photo-sphere-viewer');
+const MarkersPlugin = require('photo-sphere-viewer/dist/plugins/markers');
+
+class Client {
+
+    constructor(options) {
+        options = options || { };
+        options.api = options.api || { };
+        this.viewer = new PhotoSphereViewer.Viewer({
+            container: document.querySelector(options.container || '#viewer'),
+            plugins: [
+                MarkersPlugin
+            ]
+        });
+        this.panoNetworkMgr = new PanoNetworkMgr({
+            jsonApi: options.api.geojson,
+            nearbyApi: options.api.nearby
+        });
+        this.lat = 0.0;
+        this.lon = 0.0;
+        this.eventHandlers = {};
+        this.resizePano = options.resizePano;
+        this.api = { };
+        this.api.nearest = options.api.nearest || 'op/panorama/nearest/{lon}/{lat}'; 
+        this.api.byId = options.api.byId || 'op/panorama/{id}';
+        this.api.panoImg = options.api.panoImg || 'op/panorama/{id}.jpg';
+        this.api.panoImgResized = options.api.panoImgResized || 'op/panorama/{id}.w{width}.jpg';
+        this.nearbys = { };
+        this.panoMetadata = { };
+        this.markersPlugin = this.viewer.getPlugin(MarkersPlugin);
+        this.markersPlugin.on("select-marker", (e, marker, data) => {
+            const id = parseInt(marker.id.split('-')[1]);
+            this.moveTo(id);
+        });
+        this.arrowImage = options.arrowImage || 'images/arrow.png';
+        this.curPanoId = 0;
+    }
+
+
+    async findPanoramaByLonLat(lon,lat) {
+        const json = await fetch(this.api.nearest
+                .replace('{lon}', lon)
+                .replace('{lat}', lat))
+                .then(resp=>resp.json());
+        this.loadPanorama(json.id);
+    }
+
+    async loadPanorama(id) {
+        if(!this.panoMetadata[id]) {
+             await this._loadPanoMetadata(id);
+        }
+        this.viewer.setPanorama(
+            this.resizePano === undefined ? 
+                this.api.panoImg.replace('{id}', id) : 
+                this.api.panoImgResized
+                    .replace('{id}', id)
+                    .replace('{width}', this.resizePano), {
+            sphereCorrection: { 
+                pan: -this.panoMetadata[id].poseheadingdegrees * Math.PI / 180.0
+            } 
+        });
+        if(!this.panoMetadata[id].nearbys) {
+            this.panoNetworkMgr.doLoadNearbys(
+                this.panoMetadata[id],
+                this._onFoundNearbys.bind(this)
+            );
+        } else {
+            this._createMarkers(id);
+        }
+    }
+
+    moveTo(id) {
+        this.markersPlugin.clearMarkers();
+        this.loadPanorama(id);
+    }
+
+    update(id, properties) {
+        if(this.panoMetadata[id]) {
+            if(properties.position) {
+                this.panoMetadata[id].lon = properties.position[0];
+                this.panoMetadata[id].lat = properties.position[1];
+            } else if (properties.poseheadingdegrees) {
+                this.panoMetadata[id].poseheadingdegrees = properties.poseheadingdegrees;
+            }
+            if(this.curPanoId == id) {    
+                this.moveTo(id);
+            }
+        }
+    }
+
+    on(evName,evHandler) {
+        this.eventHandlers[evName] = evHandler;
+    }
+
+    async _loadPanoMetadata(id) {
+        this.panoMetadata[id] = await fetch(this.api.byId.replace('{id}', id))
+                                .then(response => response.json());
+        return this.panoMetadata[id];
+    }
+
+    _onFoundNearbys(origPano, nearbys) {
+        this.panoMetadata[origPano.id].nearbys = nearbys;
+        this._createMarkers(origPano.id);
+    }
+
+    _createMarkers(id) {
+
+        this.curPanoId = id;
+
+        if(this.eventHandlers.panoChanged) {
+            this.eventHandlers.panoChanged(id);
+        }
+
+        if(this.eventHandlers.locationChanged) {
+            this.eventHandlers.locationChanged(this.panoMetadata[id].lon, this.panoMetadata[id].lat);
+        }
+
+        this.panoMetadata[id].nearbys.forEach ( nearby => {
+            nearby.key = `${id}-${nearby.id}`;
+            let yaw = nearby.bearing;
+            this.markersPlugin.addMarker({
+                id: `#${id}-${nearby.id}`,
+                latitude: 10 * Math.PI/180,
+                longitude: `${yaw}deg`,
+                image: this.arrowImage,
+                width: 64,
+                height: 64,
+                data: {
+                    generated: true 
+                } 
+            });
+        });
+    }
+
+    _showMarkers(id) {
+        this.panoMetadata[id].nearbys.forEach(nearby => {
+            this.markersPlugin.showMarker(nearby.key);
+        });
+    }
+
+    _hideMarkers(id) {
+        this.panoMetadata[id].nearbys.forEach(nearby => {
+            this.markersPlugin.hideMarker(nearby.key);
+        });
+    }
+}
+
+module.exports = {
+    Client: Client
+};
+
+},{"./PanoNetworkMgr":20,"photo-sphere-viewer":28,"photo-sphere-viewer/dist/plugins/markers":29}],28:[function(require,module,exports){
 /*!
 * Photo Sphere Viewer 4.0.6
 * @copyright 2014-2015 Jérémy Heleine
@@ -12341,7 +12161,7 @@ module.exports = {
 })));
 
 
-},{"three":33,"uevent":36}],32:[function(require,module,exports){
+},{"three":33,"uevent":36}],29:[function(require,module,exports){
 /*!
 * Photo Sphere Viewer 4.0.6
 * @copyright 2014-2015 Jérémy Heleine
@@ -14328,7 +14148,186 @@ module.exports = {
 })));
 
 
-},{"photo-sphere-viewer":31,"three":33}],33:[function(require,module,exports){
+},{"photo-sphere-viewer":28,"three":33}],30:[function(require,module,exports){
+// Copyright Joyent, Inc. and other Node contributors.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to permit
+// persons to whom the Software is furnished to do so, subject to the
+// following conditions:
+//
+// The above copyright notice and this permission notice shall be included
+// in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+// USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+'use strict';
+
+// If obj.hasOwnProperty has been overridden, then calling
+// obj.hasOwnProperty(prop) will break.
+// See: https://github.com/joyent/node/issues/1707
+function hasOwnProperty(obj, prop) {
+  return Object.prototype.hasOwnProperty.call(obj, prop);
+}
+
+module.exports = function(qs, sep, eq, options) {
+  sep = sep || '&';
+  eq = eq || '=';
+  var obj = {};
+
+  if (typeof qs !== 'string' || qs.length === 0) {
+    return obj;
+  }
+
+  var regexp = /\+/g;
+  qs = qs.split(sep);
+
+  var maxKeys = 1000;
+  if (options && typeof options.maxKeys === 'number') {
+    maxKeys = options.maxKeys;
+  }
+
+  var len = qs.length;
+  // maxKeys <= 0 means that we should not limit keys count
+  if (maxKeys > 0 && len > maxKeys) {
+    len = maxKeys;
+  }
+
+  for (var i = 0; i < len; ++i) {
+    var x = qs[i].replace(regexp, '%20'),
+        idx = x.indexOf(eq),
+        kstr, vstr, k, v;
+
+    if (idx >= 0) {
+      kstr = x.substr(0, idx);
+      vstr = x.substr(idx + 1);
+    } else {
+      kstr = x;
+      vstr = '';
+    }
+
+    k = decodeURIComponent(kstr);
+    v = decodeURIComponent(vstr);
+
+    if (!hasOwnProperty(obj, k)) {
+      obj[k] = v;
+    } else if (isArray(obj[k])) {
+      obj[k].push(v);
+    } else {
+      obj[k] = [obj[k], v];
+    }
+  }
+
+  return obj;
+};
+
+var isArray = Array.isArray || function (xs) {
+  return Object.prototype.toString.call(xs) === '[object Array]';
+};
+
+},{}],31:[function(require,module,exports){
+// Copyright Joyent, Inc. and other Node contributors.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to permit
+// persons to whom the Software is furnished to do so, subject to the
+// following conditions:
+//
+// The above copyright notice and this permission notice shall be included
+// in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+// USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+'use strict';
+
+var stringifyPrimitive = function(v) {
+  switch (typeof v) {
+    case 'string':
+      return v;
+
+    case 'boolean':
+      return v ? 'true' : 'false';
+
+    case 'number':
+      return isFinite(v) ? v : '';
+
+    default:
+      return '';
+  }
+};
+
+module.exports = function(obj, sep, eq, name) {
+  sep = sep || '&';
+  eq = eq || '=';
+  if (obj === null) {
+    obj = undefined;
+  }
+
+  if (typeof obj === 'object') {
+    return map(objectKeys(obj), function(k) {
+      var ks = encodeURIComponent(stringifyPrimitive(k)) + eq;
+      if (isArray(obj[k])) {
+        return map(obj[k], function(v) {
+          return ks + encodeURIComponent(stringifyPrimitive(v));
+        }).join(sep);
+      } else {
+        return ks + encodeURIComponent(stringifyPrimitive(obj[k]));
+      }
+    }).join(sep);
+
+  }
+
+  if (!name) return '';
+  return encodeURIComponent(stringifyPrimitive(name)) + eq +
+         encodeURIComponent(stringifyPrimitive(obj));
+};
+
+var isArray = Array.isArray || function (xs) {
+  return Object.prototype.toString.call(xs) === '[object Array]';
+};
+
+function map (xs, f) {
+  if (xs.map) return xs.map(f);
+  var res = [];
+  for (var i = 0; i < xs.length; i++) {
+    res.push(f(xs[i], i));
+  }
+  return res;
+}
+
+var objectKeys = Object.keys || function (obj) {
+  var res = [];
+  for (var key in obj) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) res.push(key);
+  }
+  return res;
+};
+
+},{}],32:[function(require,module,exports){
+'use strict';
+
+exports.decode = exports.parse = require('./decode');
+exports.encode = exports.stringify = require('./encode');
+
+},{"./decode":30,"./encode":31}],33:[function(require,module,exports){
 (function (global, factory) {
 	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
 	typeof define === 'function' && define.amd ? define(['exports'], factory) :
