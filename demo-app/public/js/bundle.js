@@ -4351,6 +4351,7 @@ class Client {
     }
 
     _onFoundNearbys(origPano, nearbys) {
+		console.log(nearbys);
         this.panoMetadata[origPano.id].nearbys = nearbys;
         this._createMarkers(origPano.id);
     }
