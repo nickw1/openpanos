@@ -27,6 +27,8 @@ const client = new openpanos.Client();
 The `Client` object has various methods. Note that many of these rely on a
 server-side API being available, see below for details. In particular, to load the panoramas, you must provide a **`panoImg`** API endpoint which serves a given panorama by ID. The `openpanos-server` package will provide these endpoints for you, as long as you have the appropriate database setup. See `openpanos-server` for details on this.
 
+**Note all methods are asynchronous and thus return a promise, except for the `on` event-handling method.**
+
 - `findPanoramaByLonLat(lon, lat)` : finds and loads the nearest panorama
 to a given latitude and longitude.
 	- * You must have a **`nearest`** API endpoint setup, to find the nearest panorama server-side. `openpanos-server` will provide this for you, or use your own. See below.

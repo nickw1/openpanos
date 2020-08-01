@@ -29,9 +29,9 @@ class Client {
         this.nearbys = { };
         this.panoMetadata = { };
         this.markersPlugin = this.viewer.getPlugin(MarkersPlugin);
-        this.markersPlugin.on("select-marker", (e, marker, data) => {
+        this.markersPlugin.on("select-marker", async (e, marker, data) => {
             const id = parseInt(marker.id.split('-')[1]);
-            this.moveTo(id);
+            await this.moveTo(id);
         });
         this.arrowImage = options.arrowImage || 'images/arrow.png';
         this.curPanoId = 0;
@@ -43,7 +43,7 @@ class Client {
                 .replace('{lon}', lon)
                 .replace('{lat}', lat))
                 .then(resp=>resp.json());
-        this.loadPanorama(json.id);
+        await this.loadPanorama(json.id);
     }
 
     async loadPanorama(id) {
@@ -70,12 +70,12 @@ class Client {
         }
     }
 
-    moveTo(id) {
+    async moveTo(id) {
         this.markersPlugin.clearMarkers();
-        this.loadPanorama(id);
+        await this.loadPanorama(id);
     }
 
-    update(id, properties) {
+    async update(id, properties) {
         if(this.panoMetadata[id]) {
             if(properties.position) {
                 this.panoMetadata[id].lon = properties.position[0];
@@ -84,7 +84,7 @@ class Client {
                 this.panoMetadata[id].poseheadingdegrees = properties.poseheadingdegrees;
             }
             if(this.curPanoId == id) {    
-                this.moveTo(id);
+                await this.moveTo(id);
             }
         }
     }
@@ -100,7 +100,6 @@ class Client {
     }
 
     _onFoundNearbys(origPano, nearbys) {
-		console.log(nearbys);
         this.panoMetadata[origPano.id].nearbys = nearbys;
         this._createMarkers(origPano.id);
     }
