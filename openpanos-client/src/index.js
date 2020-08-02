@@ -31,10 +31,11 @@ class Client {
         this.markersPlugin = this.viewer.getPlugin(MarkersPlugin);
         this.markersPlugin.on("select-marker", async (e, marker, data) => {
             const id = parseInt(marker.id.split('-')[1]);
-            await this.moveTo(id);
+            await this.loadPanorama(id);
         });
         this.arrowImage = options.arrowImage || 'images/arrow.png';
         this.curPanoId = 0;
+        this.viewerReady = false;
     }
 
 
@@ -47,9 +48,13 @@ class Client {
     }
 
     async loadPanorama(id) {
+        if(this.panoMetadata[this.curPanoId] && this.panoMetadata[this.curPanoId].nearbys) {
+            this._hideMarkers(this.curPanoId);
+        }
         if(!this.panoMetadata[id]) {
              await this._loadPanoMetadata(id);
-        }
+        } 
+
         this.viewer.setPanorama(
             this.resizePano === undefined ? 
                 this.api.panoImg.replace('{id}', id) : 
@@ -60,18 +65,31 @@ class Client {
                 pan: -this.panoMetadata[id].poseheadingdegrees * Math.PI / 180.0
             } 
         });
+
+        if(this.viewerReady === true) {
+            this._loadMarkers(id);
+        } else { 
+            this.viewer.on('ready', () => {
+                this.viewerReady = true;
+                this._loadMarkers(id);
+            });
+        }
+    }
+
+    _loadMarkers(id) {    
         if(!this.panoMetadata[id].nearbys) {
             this.panoNetworkMgr.doLoadNearbys(
                 this.panoMetadata[id],
                 this._onFoundNearbys.bind(this)
             );
         } else {
-            this._createMarkers(id);
+              this._setPanoId(id);
+              this._showMarkers(this.curPanoId);
         }
     }
 
+    // backwards compatibility with all 0.2.x series
     async moveTo(id) {
-        this.markersPlugin.clearMarkers();
         await this.loadPanorama(id);
     }
 
@@ -83,8 +101,12 @@ class Client {
             } else if (properties.poseheadingdegrees) {
                 this.panoMetadata[id].poseheadingdegrees = properties.poseheadingdegrees;
             }
+
+            this._removeMarkers(id);
+            this.panoMetadata[id].nearbys = null;
+
             if(this.curPanoId == id) {    
-                await this.moveTo(id);
+                await this.loadPanorama(id);
             }
         }
     }
@@ -101,11 +123,11 @@ class Client {
 
     _onFoundNearbys(origPano, nearbys) {
         this.panoMetadata[origPano.id].nearbys = nearbys;
+        this._setPanoId(origPano.id);
         this._createMarkers(origPano.id);
     }
 
-    _createMarkers(id) {
-
+    _setPanoId(id) {
         this.curPanoId = id;
 
         if(this.eventHandlers.panoChanged) {
@@ -115,20 +137,21 @@ class Client {
         if(this.eventHandlers.locationChanged) {
             this.eventHandlers.locationChanged(this.panoMetadata[id].lon, this.panoMetadata[id].lat);
         }
+    }
+
+    _createMarkers(id) {
 
         this.panoMetadata[id].nearbys.forEach ( nearby => {
             nearby.key = `${id}-${nearby.id}`;
             let yaw = nearby.bearing;
             this.markersPlugin.addMarker({
-                id: `#${id}-${nearby.id}`,
-                latitude: 10 * Math.PI/180,
+                id: nearby.key, 
+                latitude: 5 * Math.PI / 180.0, 
                 longitude: `${yaw}deg`,
                 image: this.arrowImage,
                 width: 64,
                 height: 64,
-                data: {
-                    generated: true 
-                } 
+                tooltip: `to pano ${nearby.id}`
             });
         });
     }
@@ -142,6 +165,12 @@ class Client {
     _hideMarkers(id) {
         this.panoMetadata[id].nearbys.forEach(nearby => {
             this.markersPlugin.hideMarker(nearby.key);
+        });
+    }
+
+    _removeMarkers(id) {
+        this.panoMetadata[id].nearbys.forEach(nearby => {
+            this.markersPlugin.removeMarker(nearby.key);
         });
     }
 }

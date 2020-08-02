@@ -1,10 +1,10 @@
 {
   "name": "openpanos-demo-app",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "OpenPanos demo app",
   "main": "app.js",
   "dependencies": {
-    "openpanos-client": "^0.2.0",
+    "openpanos-client": "^0.2.2",
     "openpanos-server": "^0.1.8",
     "photo-sphere-viewer": "^4.0.6",
     "pug": "^2.0.4"

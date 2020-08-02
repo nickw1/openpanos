@@ -12,3 +12,4 @@ if(get.id) {
 } else {
     client.loadPanorama(1);
 }
+

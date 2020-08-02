@@ -36,7 +36,7 @@ to a given latitude and longitude.
 - `loadPanorama(id)` - will load a given panorama by ID.
 	- * You must have a **`byID`** API endpoint setup, to find the panorama with that ID. `openpanos-server` will provide this for you, or use your own. See below.
 
-- `moveTo(id)` - moves to an already-loaded panorama with a given ID.
+- `moveTo(id)` - moves to an already-loaded panorama with a given ID. **DEPRECATED - as of 0.2.2, just use loadPanorama()**
 
 - `update(id, properties)` - updates selected metadata of a given panorama
 referenced by ID. The `properties` parameter is an object containing this
