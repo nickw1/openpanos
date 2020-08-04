@@ -64,16 +64,9 @@ class Client {
             sphereCorrection: { 
                 pan: -this.panoMetadata[id].poseheadingdegrees * Math.PI / 180.0
             } 
-        });
-
-        if(this.viewerReady === true) {
+        }).then( () => { 
             this._loadMarkers(id);
-        } else { 
-            this.viewer.on('ready', () => {
-                this.viewerReady = true;
-                this._loadMarkers(id);
-            });
-        }
+        });
     }
 
     _loadMarkers(id) {    

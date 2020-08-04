@@ -8,14 +8,13 @@ const turfBearing = require('@turf/bearing').default;
 
 class PanoNetworkMgr {
 
-	constructor(options) {
-		this.options = options || { };
-		this.options.jsonApi = this.options.jsonApi || 'op/map/highways';
-		this.options.nearbyApi = this.options.nearbyApi || 'op/panorama/{id}/nearby';
-	}
+    constructor(options) {
+        this.options = options || { };
+        this.options.jsonApi = this.options.jsonApi || 'op/map/highways';
+        this.options.nearbyApi = this.options.nearbyApi || 'op/panorama/{id}/nearby';
+    }
 
     doLoadNearbys (json,callback) {
-		console.log(json);
         var html = "";
         var goog = new GoogleProjection(); 
 
