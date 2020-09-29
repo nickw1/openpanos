@@ -7,7 +7,7 @@ class Client {
     constructor(options) {
         options = options || { };
         options.api = options.api || { };
-        this.viewer = new PhotoSphereViewer.Viewer({
+        this.viewer = options.psv || new PhotoSphereViewer.Viewer({
             container: document.querySelector(options.container || '#viewer'),
             plugins: [
                 MarkersPlugin
