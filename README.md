@@ -9,7 +9,7 @@ OpenPanos is a platform for creating linked networks of 360 panoramas using a Ge
 The client is Photo Sphere Viewer and GeoJSON Path Finder-based, and handles displaying and linking the panoramas.  By default, the client will work with a given set of endpoints. However this is configurable and you can connect it to your own GeoJSON-based API. Please see the docs in `openpanos-client` for details.
 
 ### The server ###
-The server has been deprecated in favour of the [OpenWanderer](https://github.com/openwanderer) project. It is available as part of the ["old things"](https://gitlab.com/nickw1/old_stuff) repo for those that may want to work with it.
+The (experimental) server has been deprecated in favour of the [OpenWanderer](https://github.com/openwanderer) project. It is available as part of [this repository of old and experimental projects](https://gitlab.com/nickw1/old_stuff) for those that may want to work with it.
 
 ## Installing ##
 
