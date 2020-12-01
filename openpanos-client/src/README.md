@@ -13,7 +13,7 @@ as it relies on a bugfix which has not been merged into master on the original p
 OpenPanos consists of two parts, a **client** and a **server**. It is possible to use the client without the server if you provide your own server.
 
 ### The client ###
-The client (`openpanos-client`; this package) is Photo Sphere Viewer and GeoJSON Path Finder-based, and handles displaying and linking the panoramas.  By default, the client will work with the OpenPanos server. However this is configurable and you can connect it to your own PostGIS-based API.
+The client (`openpanos-client`; this package) is Photo Sphere Viewer and GeoJSON Path Finder-based, and handles displaying and linking the panoramas.  By default, the client will work with a given set of API endpoints. However this is configurable and you can connect it to your own PostGIS-based API.
 
 #### Basic usage of the client ####
 
@@ -25,16 +25,16 @@ const client = new openpanos.Client();
 ```
 
 The `Client` object has various methods. Note that many of these rely on a
-server-side API being available, see below for details. In particular, to load the panoramas, you must provide a **`panoImg`** API endpoint which serves a given panorama by ID. The `openpanos-server` package will provide these endpoints for you, as long as you have the appropriate database setup. See `openpanos-server` for details on this.
+server-side API being available, see below for details. In particular, to load the panoramas, you must provide a **`panoImg`** API endpoint which serves a given panorama by ID.
 
 **Note all methods are asynchronous and thus return a promise, except for the `on` event-handling method.**
 
 - `findPanoramaByLonLat(lon, lat)` : finds and loads the nearest panorama
 to a given latitude and longitude.
-	- * You must have a **`nearest`** API endpoint setup, to find the nearest panorama server-side. `openpanos-server` will provide this for you, or use your own. See below.
+	- * You must have a **`nearest`** API endpoint setup, to find the nearest panorama server-side. 
 
 - `loadPanorama(id)` - will load a given panorama by ID.
-	- * You must have a **`byID`** API endpoint setup, to find the panorama with that ID. `openpanos-server` will provide this for you, or use your own. See below.
+	- * You must have a **`byID`** API endpoint setup, to find the panorama with that ID. 
 
 - `moveTo(id)` - moves to an already-loaded panorama with a given ID. **DEPRECATED - as of 0.2.2, just use loadPanorama()**
 
@@ -53,7 +53,7 @@ The events that are currently handled are:
 
 For OpenPanos to work, you need a server set up which will provide your panorama images, find panorama metadata by ID, find the nearest panorama to a given latitude and longitude, and find panoramas near to the current one.
 
-If you use `openpanos-server`, you do not need to do this as the endpoints are setup for you. Otherwise, these endpoints can be specified as options when you create your `Client` object:
+These endpoints can be specified as options when you create your `Client` object:
 
 ```javascript
 const Client = new openpanos.Client({
@@ -68,7 +68,7 @@ const Client = new openpanos.Client({
 });
 ```
 
-Each endpoint is described in detail below, along with its default value (which is provided by `openpanos-server`). Note that values in braces will be replaced by the code with whatever the current value is.
+Each endpoint is described in detail below, along with its default value. Note that values in braces will be replaced by the code with whatever the current value is.
 
 **`byId` endpoint** (default `op/panorama/{id}`) : returns a JSON object with these properties:
 - `id`: the pano ID
@@ -86,9 +86,6 @@ Each endpoint is described in detail below, along with its default value (which 
 
 **`geojson` endpoint** (default `op/map/highways`) : expects one *query string* parameter `bbox` containing w,s,e,n in WGS84 lat/lon. Returns GeoJSON data of all highways (routes, including paths) in the given bounding box, for example OpenStreetMap highways. 
 
-**`nearby` endpoint** (default `op/panorama/{id}/nearby`} : returns all panoramas nearby to a given source panorama. It's up to you how you define "nearby", but this call is necessary to link panoramas to adjacent ones, so don't set the value too small. `openpanos-server` and OpenTrailView use 500 metres. It should return a JSON object containing:
+**`nearby` endpoint** (default `op/panorama/{id}/nearby`} : returns all panoramas nearby to a given source panorama. It's up to you how you define "nearby", but this call is necessary to link panoramas to adjacent ones, so don't set the value too small. It should return a JSON object containing:
 - `panos` : an array of individual panorama objects (see `byId` and `nearest` above);
 - `bbox` : the bounding box of all panoramas returned.
-
-### The server ###
-The [server](https://www.npmjs.com/package/openpanos-server) (`openpanos-server`) is node.js based and by default, works with a standard OpenStreetMap PostGIS database to serve OpenStreetMap data as GeoJSON, which is used to link the panoramas.  See the `openpanos-server` package for details.
