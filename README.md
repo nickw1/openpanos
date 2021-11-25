@@ -1,6 +1,5 @@
-# openpanos
-A platform for creating linked, navigable networks of 360 panoramas.
-
+# DEPRECATED !!!
+This project is deprecated. Please use [OpenWanderer](https://github.com/openwanderer/jsapi) instead.
 
 ## Introduction
 OpenPanos is a platform for creating linked networks of 360 panoramas using a GeoJSON API.
